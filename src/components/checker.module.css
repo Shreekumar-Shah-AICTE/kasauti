@@ -1,0 +1,189 @@
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.stepItem {
+  color: var(--color-muted);
+}
+
+.stepCurrent {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.label {
+  display: block;
+  margin: 1.25rem 0 0.35rem;
+  font-weight: 600;
+}
+
+.help {
+  color: var(--color-muted);
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.6rem;
+  font: inherit;
+  border: 1px solid #b9b4a7;
+  border-radius: 6px;
+  background: #fff;
+  resize: vertical;
+}
+
+.file {
+  display: block;
+  padding: 0.4rem 0;
+}
+
+.status {
+  min-height: 1.5rem;
+  color: var(--color-muted);
+}
+
+.error {
+  border-left: 4px solid #a12d2f;
+  padding: 0.5rem 0.75rem;
+  color: #7d1f21;
+  background: #fdf1f1;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.primary,
+.secondary,
+.sample,
+.link {
+  font: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primary {
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--color-brand);
+  background: var(--color-brand);
+  color: #fff;
+}
+
+.primary:disabled {
+  background: #8a94a3;
+  border-color: #8a94a3;
+  cursor: not-allowed;
+}
+
+.secondary {
+  padding: 0.6rem 1.1rem;
+  border: 1px solid var(--color-brand);
+  background: transparent;
+  color: var(--color-brand);
+}
+
+.link {
+  border: none;
+  background: none;
+  color: var(--color-brand);
+  text-decoration: underline;
+  padding: 0.25rem 0;
+}
+
+.fieldset {
+  border: 1px solid #d8d3c6;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+}
+
+.samples {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  list-style: none;
+}
+
+.sample {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d8d3c6;
+  background: #fff;
+}
+
+.sampleTitle {
+  display: block;
+  font-weight: 600;
+  color: var(--color-brand);
+}
+
+.sampleSummary {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+.beliefList {
+  display: grid;
+  gap: 1.25rem;
+  padding: 0;
+  margin: 1rem 0 0;
+  list-style: none;
+}
+
+.beliefItem {
+  border: 1px solid #d8d3c6;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  background: #fff;
+}
+
+.prompt {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.kind {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: #eceade;
+  color: var(--color-muted);
+}
+
+.counter {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.banner {
+  border-left: 4px solid #8a6d1f;
+  background: #fdf8e8;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 1rem;
+}

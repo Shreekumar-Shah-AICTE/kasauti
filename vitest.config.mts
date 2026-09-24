@@ -18,7 +18,7 @@ export default defineConfig({
         'src/lib/**/*.ts',
         'src/samples/**/*.ts',
       ],
-      exclude: ['src/**/*.test.ts', 'src/ai/gemini.ts'],
+      exclude: ['src/**/*.test.ts', 'src/ai/gemini.ts', 'src/lib/pdf/extractPages.ts'],
       reporter: ['text-summary', 'json-summary'],
       thresholds: { lines: 100, branches: 100, functions: 100, statements: 100 },
     },

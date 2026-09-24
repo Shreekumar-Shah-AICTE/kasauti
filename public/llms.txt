@@ -1,0 +1,43 @@
+# Kasauti
+
+> Test what you believe about a legal document before you sign it. The user says what they think
+> their contract says; Kasauti marks each belief against the document's own words, with a quote and
+> page number verified by code rather than by the model.
+
+Kasauti (Hindi, "touchstone") is a Next.js app. Its defining property is the trust boundary: a
+language model proposes verdicts and quotes, and deterministic code decides what the user is shown.
+
+## How a check works
+
+1. The user supplies a document (pasted text, an in-browser PDF parse, or a built-in sample).
+2. The user picks a situation (tenant, employee, freelancer, consumer).
+3. Teach-back: the user writes what they believe the document says, and any promises they were given
+   verbally, BEFORE seeing anything quoted from the document.
+4. One batched model call returns, per belief: a verdict (backed, contradicted, silent), a verbatim
+   quote, search terms, and a one-sentence explanation.
+5. Code verifies each quote against the uploaded text (exact, then whitespace/case-normalized, then
+   word-level fuzzy above 0.9). Unverifiable quotes are rejected and the verdict becomes
+   needs_review with the reason shown. Page and clause numbers are computed from the matched offset.
+   A "silent" verdict requires at least two distinct search terms.
+6. The report shows verdict cards with evidence, an "ask for this in writing" list (verbal promises
+   plus beliefs the document never addresses), questions worth asking a lawyer, and a plain-text
+   export.
+
+## Facts
+
+- Verdicts: backed, contradicted, silent, needs_review. Only code can produce needs_review.
+- At most two model calls per document (probe questions, then one batched check).
+- Degrades to an offline mode with no API key or on any model failure: deterministic probe questions,
+  keyword passages, every finding marked needs_review, with a banner stating that nothing was checked.
+- Nothing is stored. No database, no analytics. PDFs are parsed on the device; API responses are
+  no-store. Live results sit in an in-memory cache for the life of the server instance.
+- Quality gate: typecheck, ESLint with zero warnings, Prettier, Vitest at 100% coverage of core, AI,
+  server, lib and samples, plus a production build. CI runs the same command.
+- Kasauti gives information, not legal advice, and does not assess enforceability in any jurisdiction.
+
+## Documentation
+
+- README.md: what it is, a 60-second walkthrough, how to run it
+- ARCHITECTURE.md: layers, the trust boundary table, flow, cost and failure design
+- SECURITY.md: storage, untrusted model output, input limits, rate limiting, CSP, secrets
+- RISKS.md: honest failure modes, including unfixed ones

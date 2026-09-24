@@ -17,11 +17,7 @@ interface VerdictStyle {
  */
 const VERDICTS: Readonly<Record<Verdict, VerdictStyle>> = {
   backed: { label: 'You were right', mark: '\u2713', className: styles.backed },
-  contradicted: {
-    label: 'The document says otherwise',
-    mark: '\u2715',
-    className: styles.contradicted,
-  },
+  contradicted: { label: 'The document says otherwise', mark: '\u2715', className: styles.contradicted },
   silent: { label: 'The document never says', mark: '\u2014', className: styles.silent },
   needs_review: { label: 'Check this yourself', mark: '?', className: styles.review },
 };
@@ -48,14 +44,21 @@ function SilentNote({ finding }: { readonly finding: ResolvedFinding }): ReactNo
   return <p className={styles.counter}>Searched your document for: {finding.searchedTerms.join(', ')}</p>;
 }
 
+/**
+ * Class names for one card. CSS-module lookups are `string | undefined` under
+ * `noUncheckedIndexedAccess`, so they are defaulted here rather than in the JSX.
+ */
+function cardClass(verdict: VerdictStyle): string {
+  const base = styles.card ?? '';
+  const tone = verdict.className ?? '';
+  return `${base} ${tone}`.trim();
+}
+
 /** One belief, its verdict, and the evidence behind it. */
 export function VerdictCard({ row }: { readonly row: ReportRow }): ReactNode {
   const verdict = VERDICTS[row.finding.verdict];
-  const className = [styles.card, verdict.className]
-    .filter((name): name is string => name !== undefined)
-    .join(' ');
   return (
-    <li className={className}>
+    <li className={cardClass(verdict)}>
       <h3 className={styles.cardHeading}>
         <span aria-hidden="true" className={styles.mark}>
           {verdict.mark}

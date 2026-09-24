@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+coverage
+reports
+*.tsbuildinfo
+next-env.d.ts
+.env
+.env*.local
+.vercel
+.DS_Store
+package-lock.json

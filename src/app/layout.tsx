@@ -1,6 +1,7 @@
 import './globals.css';
 
 import type { Metadata, Viewport } from 'next';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 
 export const metadata: Metadata = {
@@ -11,8 +12,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: '#1f3a5f' };
 
-/** Root layout: sets the document language and a skip link for keyboard users. */
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>): ReactNode {
+/**
+ * Root layout: sets the document language and a skip link for keyboard users.
+ * Rendering per request lets Next.js stamp the middleware's CSP nonce on every script.
+ */
+export default async function RootLayout({
+  children,
+}: Readonly<{ children: ReactNode }>): Promise<ReactNode> {
+  await connection();
   return (
     <html lang="en">
       <body>

@@ -63,3 +63,33 @@ export const AI = {
   /** Characters of the invalid reply echoed back in the repair attempt. */
   maxEchoChars: 2_000,
 } as const;
+
+/** HTTP API guards (see SECURITY.md). Every limit is per server instance. */
+export const SERVER = {
+  /** Largest request body accepted, in bytes (the document cap plus JSON overhead). */
+  maxBodyBytes: 256_000,
+  /** Requests one client may burst before throttling. */
+  rateLimitBurst: 10,
+  /** Tokens regained per minute per client. */
+  rateLimitPerMinute: 10,
+  /** Distinct clients tracked before the least recently seen is evicted. */
+  rateLimitMaxClients: 5_000,
+  /** Live results kept in the hash-keyed cache. */
+  cacheEntries: 100,
+  /** Letters a belief or document needs before it counts as meaningful text (rejects gibberish like "??"). */
+  minMeaningfulLetters: 3,
+  /** Maximum characters in one belief or promise. */
+  maxBeliefChars: 300,
+} as const;
+
+/** HTTP status codes used by the API. */
+export const HTTP_STATUS = {
+  badRequest: 400,
+  payloadTooLarge: 413,
+  unprocessable: 422,
+  tooManyRequests: 429,
+  internal: 500,
+} as const;
+
+/** Milliseconds in one minute. */
+export const MS_PER_MINUTE = 60_000;

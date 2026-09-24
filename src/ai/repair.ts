@@ -4,8 +4,7 @@ import { AI } from '@/core/constants';
 
 /** Outcome of parsing a model reply against its schema. */
 export type ParseResult<T> =
-  | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly issue: string };
+  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly issue: string };
 
 const FENCE = '```';
 

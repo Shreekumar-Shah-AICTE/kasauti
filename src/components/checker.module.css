@@ -187,3 +187,104 @@
   padding: 0.6rem 0.85rem;
   margin-bottom: 1rem;
 }
+
+.score {
+  font-size: 1.1rem;
+  margin: 0 0 var(--space) 0;
+}
+
+.cardList {
+  list-style: none;
+  margin: 0 0 calc(var(--space) * 1.5) 0;
+  padding: 0;
+}
+
+.card {
+  border: 1px solid #d8d3c6;
+  border-left-width: 6px;
+  border-radius: 4px;
+  margin-bottom: var(--space);
+  padding: var(--space);
+}
+
+.backed {
+  border-left-color: #2f6b3f;
+}
+
+.contradicted {
+  border-left-color: #a12d2f;
+}
+
+.silent {
+  border-left-color: #8a6d1f;
+}
+
+.review {
+  border-left-color: #8a94a3;
+}
+
+.cardHeading {
+  align-items: baseline;
+  display: flex;
+  font-size: 1rem;
+  gap: 0.5rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.mark {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.said {
+  color: var(--color-muted);
+  margin: 0 0 0.5rem 0;
+}
+
+.source {
+  background: #f4f1e6;
+  border-left: 3px solid #b9b4a7;
+  margin: var(--space) 0 0 0;
+  padding: 0.75rem;
+}
+
+.quote {
+  margin: 0;
+}
+
+.sourceMeta {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.tier {
+  display: block;
+}
+
+.reviewNote {
+  color: #7d1f21;
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.exportBar {
+  border-top: 1px solid #d8d3c6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: calc(var(--space) * 1.5);
+  padding-top: var(--space);
+}
+
+@media print {
+  .exportBar,
+  .actions,
+  .stepper {
+    display: none;
+  }
+
+  .card {
+    break-inside: avoid;
+  }
+}

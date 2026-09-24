@@ -82,6 +82,12 @@ export const SERVER = {
   maxBeliefChars: 300,
 } as const;
 
+/** Report presentation limits. */
+export const REPORT = {
+  /** Most questions offered for a lawyer, so the list stays actionable. */
+  maxQuestions: 5,
+} as const;
+
 /** HTTP status codes used by the API. */
 export const HTTP_STATUS = {
   badRequest: 400,

@@ -17,8 +17,7 @@ export interface ApiFailure {
 }
 
 export type ApiResult<T> =
-  | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly error: ApiFailure };
+  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: ApiFailure };
 
 /** Minimal fetch shape, injected so tests never touch the network. */
 export type Fetcher = (input: string, init: RequestInit) => Promise<Response>;

@@ -30,7 +30,7 @@ export interface Evidence {
 }
 
 /** Why a finding was downgraded to `needs_review`. */
-export type ReviewReason = 'quote_missing' | 'quote_unverified' | 'too_few_search_terms';
+export type ReviewReason = 'quote_missing' | 'quote_unverified' | 'too_few_search_terms' | 'offline_mode';
 
 /** A finding after the deterministic verdict policy has been applied. */
 export interface ResolvedFinding {
@@ -40,4 +40,11 @@ export interface ResolvedFinding {
   readonly explanation: string;
   readonly searchedTerms: readonly string[];
   readonly reviewReason: ReviewReason | null;
+}
+
+/** What the user wants checked: their own belief, or a promise someone made them verbally. */
+export interface BeliefInput {
+  readonly id: string;
+  readonly kind: 'belief' | 'promise';
+  readonly text: string;
 }

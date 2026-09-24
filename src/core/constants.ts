@@ -39,3 +39,27 @@ export const LOCATE = {
   /** Passages returned per belief in offline mode. */
   offlinePassages: 1,
 } as const;
+
+/** Model and output limits for the AI layer (see DECISIONS: models verified live). */
+export const AI = {
+  /** Fast, cheap model for writing probe questions. */
+  probeModel: 'gemini-3.5-flash-lite',
+  /** Stronger model for the single batched belief check. */
+  checkModel: 'gemini-3.8-flash',
+  /** Hard timeout per model call. */
+  timeoutMs: 20_000,
+  /** Probe questions shown per document. */
+  maxProbes: 3,
+  /** Characters of the document sent when writing probes (the opening pages carry the key terms). */
+  probeExcerptChars: 12_000,
+  maxIdChars: 40,
+  maxTopicChars: 60,
+  maxQuestionChars: 240,
+  maxTermChars: 80,
+  maxSearchTerms: 10,
+  maxExplanationChars: 400,
+  /** Characters of a validation error echoed back in the single repair attempt. */
+  maxIssueChars: 600,
+  /** Characters of the invalid reply echoed back in the repair attempt. */
+  maxEchoChars: 2_000,
+} as const;

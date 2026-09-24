@@ -25,3 +25,17 @@ export const EVIDENCE = {
 
 /** Separator placed between pages when a document is joined into one string. */
 export const PAGE_SEPARATOR = '\n\n';
+
+/** Verdict policy thresholds (see docs/adr/0002-silence-is-a-verdict.md). */
+export const VERDICT_POLICY = {
+  /** A `silent` verdict must show it searched for at least this many distinct terms. */
+  minSilentSearchTerms: 2,
+} as const;
+
+/** Deterministic keyword locator settings. */
+export const LOCATE = {
+  /** Words shorter than this are ignored as keywords. */
+  minKeywordChars: 3,
+  /** Passages returned per belief in offline mode. */
+  offlinePassages: 1,
+} as const;

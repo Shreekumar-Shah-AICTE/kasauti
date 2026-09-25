@@ -1,0 +1,268 @@
+{
+  "documents": {
+    "rent": {
+      "label": "Residential rent agreement (India)",
+      "pages": [
+        "RESIDENTIAL LEASE AGREEMENT\n1. Term. This agreement is for 11 months commencing 1 April 2026, with a lock-in period of 6 months.\n2. Rent. The monthly rent is Rs 28,000, payable in advance on or before the 5th day of each month.\n3. Escalation. Rent shall increase by 8% on each renewal.\n4. Security deposit. The tenant shall pay a refundable deposit of Rs 1,68,000.\n5. Deductions. On vacating, one month's rent shall be deducted from the deposit towards painting and cleaning charges, irrespective of the condition of the premises.\n6. Refund. The balance deposit shall be refunded within 45 days of handover of vacant possession.",
+        "7. Maintenance. Society maintenance charges shall be borne by the tenant in addition to rent.\n8. Repairs. Minor repairs up to Rs 2,000 per instance are the tenant's responsibility; major structural repairs are the landlord's.\n9. Entry. The landlord may enter the premises after 24 hours' written notice.\n10. Notice. Either party may terminate after the lock-in by giving 2 months' written notice.\n11. Subletting. The tenant shall not sublet or assign the premises.\n12. Termination for default. The landlord may terminate immediately if rent is unpaid for 15 days."
+      ]
+    },
+    "offer": {
+      "label": "Software engineer offer letter",
+      "pages": [
+        "OFFER OF EMPLOYMENT\n1. Position. Software Engineer II, reporting to the Engineering Manager, based at the Pune office.\n2. Compensation. Annual fixed compensation of Rs 18,00,000, paid monthly.\n3. Variable pay. A performance bonus of up to 10% of fixed pay may be paid at the sole discretion of the management, subject to company and individual performance.\n4. Probation. You will be on probation for 6 months, during which either party may terminate with 15 days' notice.\n5. Notice period. On confirmation, the notice period is 90 days.",
+        "6. Working hours. Standard hours are 9:30 am to 6:30 pm, Monday to Friday.\n7. Leave. You are entitled to 18 days of paid leave per calendar year, in addition to public holidays.\n8. Confidentiality. You shall not disclose confidential information during or after employment.\n9. Non-solicitation. For 12 months after exit you shall not solicit employees or clients of the company.\n10. Governing law. This letter is governed by the laws of India, with courts at Pune having exclusive jurisdiction."
+      ]
+    },
+    "freelance": {
+      "label": "Freelance design contract",
+      "pages": [
+        "FREELANCE SERVICES AGREEMENT\n1. Services. The contractor shall deliver brand identity design as described in Schedule A.\n2. Fee. The total fee is Rs 2,40,000, invoiced in three equal milestones.\n3. Payment terms. Invoices are payable within 60 days of receipt.\n4. Revisions. The fee covers two rounds of revisions per milestone; further revisions are billed at Rs 3,000 per hour.\n5. Intellectual property. All deliverables, including preparatory work, vest in the client on full payment.",
+        "6. Kill fee. If the client cancels after work has begun, the contractor is paid for the milestone in progress only.\n7. Expenses. Pre-approved expenses are reimbursed at cost.\n8. Independent contractor. The contractor is not an employee and is responsible for their own taxes.\n9. Liability. The contractor's total liability is capped at the fees paid under this agreement.\n10. Termination. Either party may terminate with 30 days' written notice."
+      ]
+    }
+  },
+  "cases": [
+    {
+      "id": "rent-01",
+      "document": "rent",
+      "kind": "belief",
+      "text": "My security deposit is fully refundable when I move out",
+      "expected": "contradicted",
+      "note": "Clause 5 deducts one month's rent regardless of condition."
+    },
+    {
+      "id": "rent-02",
+      "document": "rent",
+      "kind": "belief",
+      "text": "The deposit is two months of rent",
+      "expected": "contradicted",
+      "note": "Rs 1,68,000 is six months of Rs 28,000."
+    },
+    {
+      "id": "rent-03",
+      "document": "rent",
+      "kind": "belief",
+      "text": "I have to pay rent by the 5th of every month",
+      "expected": "backed"
+    },
+    {
+      "id": "rent-04",
+      "document": "rent",
+      "kind": "belief",
+      "text": "I can leave any time in the first six months if I give notice",
+      "expected": "contradicted",
+      "note": "A 6-month lock-in applies before the notice clause."
+    },
+    {
+      "id": "rent-05",
+      "document": "rent",
+      "kind": "belief",
+      "text": "Society maintenance is included in my rent",
+      "expected": "contradicted"
+    },
+    {
+      "id": "rent-06",
+      "document": "rent",
+      "kind": "belief",
+      "text": "The landlord has to give me notice before entering the flat",
+      "expected": "backed"
+    },
+    {
+      "id": "rent-07",
+      "document": "rent",
+      "kind": "promise",
+      "text": "The landlord told me I can keep a pet dog",
+      "expected": "silent"
+    },
+    {
+      "id": "rent-08",
+      "document": "rent",
+      "kind": "promise",
+      "text": "I was told parking for one car is included",
+      "expected": "silent"
+    },
+    {
+      "id": "rent-09",
+      "document": "rent",
+      "kind": "belief",
+      "text": "My deposit comes back within 45 days of handing over the flat",
+      "expected": "backed"
+    },
+    {
+      "id": "rent-10",
+      "document": "rent",
+      "kind": "belief",
+      "text": "I can have a flatmate move in and pay me rent",
+      "expected": "contradicted",
+      "note": "Subletting is prohibited by clause 11."
+    },
+    {
+      "id": "rent-11",
+      "document": "rent",
+      "kind": "belief",
+      "text": "The rent stays the same if I renew the agreement",
+      "expected": "contradicted"
+    },
+    {
+      "id": "rent-12",
+      "document": "rent",
+      "kind": "promise",
+      "text": "The agent said the landlord will install an air conditioner before I move in",
+      "expected": "silent"
+    },
+    {
+      "id": "offer-01",
+      "document": "offer",
+      "kind": "belief",
+      "text": "My bonus of 10% is guaranteed every year",
+      "expected": "contradicted",
+      "note": "The bonus is discretionary and capped at up to 10%."
+    },
+    {
+      "id": "offer-02",
+      "document": "offer",
+      "kind": "belief",
+      "text": "My fixed salary is 18 lakh a year",
+      "expected": "backed"
+    },
+    {
+      "id": "offer-03",
+      "document": "offer",
+      "kind": "belief",
+      "text": "I can resign with one month of notice after probation",
+      "expected": "contradicted",
+      "note": "Notice after confirmation is 90 days."
+    },
+    {
+      "id": "offer-04",
+      "document": "offer",
+      "kind": "belief",
+      "text": "I get 18 days of paid leave plus public holidays",
+      "expected": "backed"
+    },
+    {
+      "id": "offer-05",
+      "document": "offer",
+      "kind": "promise",
+      "text": "The recruiter said I can work remotely three days a week",
+      "expected": "silent"
+    },
+    {
+      "id": "offer-06",
+      "document": "offer",
+      "kind": "promise",
+      "text": "I was told there are stock options after one year",
+      "expected": "silent"
+    },
+    {
+      "id": "offer-07",
+      "document": "offer",
+      "kind": "belief",
+      "text": "I cannot be let go during probation without 90 days of notice",
+      "expected": "contradicted",
+      "note": "Probation termination needs only 15 days."
+    },
+    {
+      "id": "offer-08",
+      "document": "offer",
+      "kind": "belief",
+      "text": "I am barred from joining a competitor after I leave",
+      "expected": "silent",
+      "note": "There is a non-solicitation clause but no non-compete."
+    },
+    {
+      "id": "offer-09",
+      "document": "offer",
+      "kind": "belief",
+      "text": "I must not share confidential information even after I leave",
+      "expected": "backed"
+    },
+    {
+      "id": "offer-10",
+      "document": "offer",
+      "kind": "belief",
+      "text": "Disputes would be heard by courts in Pune",
+      "expected": "backed"
+    },
+    {
+      "id": "offer-11",
+      "document": "offer",
+      "kind": "promise",
+      "text": "My manager promised a relocation allowance",
+      "expected": "silent"
+    },
+    {
+      "id": "free-01",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "I get paid within 30 days of sending an invoice",
+      "expected": "contradicted",
+      "note": "Payment terms are 60 days."
+    },
+    {
+      "id": "free-02",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "I keep the copyright in my designs",
+      "expected": "contradicted",
+      "note": "IP vests in the client on full payment."
+    },
+    {
+      "id": "free-03",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "Unlimited revisions are included in the fee",
+      "expected": "contradicted"
+    },
+    {
+      "id": "free-04",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "The total fee is 2.4 lakh billed across three milestones",
+      "expected": "backed"
+    },
+    {
+      "id": "free-05",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "If the client cancels midway I am paid the full contract value",
+      "expected": "contradicted"
+    },
+    {
+      "id": "free-06",
+      "document": "freelance",
+      "kind": "promise",
+      "text": "The client said I can show the work in my portfolio",
+      "expected": "silent"
+    },
+    {
+      "id": "free-07",
+      "document": "freelance",
+      "kind": "promise",
+      "text": "I was told there would be a late payment penalty in my favour",
+      "expected": "silent"
+    },
+    {
+      "id": "free-08",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "The company deducts and pays my taxes for me",
+      "expected": "contradicted"
+    },
+    {
+      "id": "free-09",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "Approved travel expenses are reimbursed",
+      "expected": "backed"
+    },
+    {
+      "id": "free-10",
+      "document": "freelance",
+      "kind": "belief",
+      "text": "Either side can walk away with a month's notice",
+      "expected": "backed"
+    }
+  ]
+}

@@ -15,7 +15,15 @@ const QUALITY_LIMITS = {
 
 export default tseslint.config(
   {
-    ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'next-env.d.ts', '*.config.*', 'reports/**'],
+    ignores: [
+      '.next/**',
+      'evals/**',
+      'node_modules/**',
+      'coverage/**',
+      'next-env.d.ts',
+      '*.config.*',
+      'reports/**',
+    ],
   },
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,

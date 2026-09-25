@@ -1,26 +1,11 @@
 import type { ReactNode } from 'react';
 
-import styles from '@/components/checker.module.css';
+import styles from '@/components/report/report.module.css';
 import { SourceViewer } from '@/components/report/SourceViewer';
-import type { ResolvedFinding, ReviewReason, Verdict } from '@/core/verdict/types';
+import { VerdictBadge } from '@/components/VerdictBadge';
+import type { ResolvedFinding, ReviewReason } from '@/core/verdict/types';
+import { cx } from '@/lib/cx';
 import type { ReportRow } from '@/lib/report';
-
-interface VerdictStyle {
-  readonly label: string;
-  readonly mark: string;
-  readonly className: string | undefined;
-}
-
-/**
- * Each verdict gets a label, a shape and a colour. The label and the shape carry the meaning
- * on their own, so the report still works in greyscale or with colour blindness.
- */
-const VERDICTS: Readonly<Record<Verdict, VerdictStyle>> = {
-  backed: { label: 'You were right', mark: '\u2713', className: styles.backed },
-  contradicted: { label: 'The document says otherwise', mark: '\u2715', className: styles.contradicted },
-  silent: { label: 'The document never says', mark: '\u2014', className: styles.silent },
-  needs_review: { label: 'Check this yourself', mark: '?', className: styles.review },
-};
 
 /** Why code refused to trust the model here. Shown so the gap is never silent. */
 const REVIEW_REASONS: Readonly<Record<ReviewReason, string>> = {
@@ -30,49 +15,50 @@ const REVIEW_REASONS: Readonly<Record<ReviewReason, string>> = {
   offline_mode: 'The model was unavailable, so nothing was checked against your document.',
 };
 
-function ReviewNote({ finding }: { readonly finding: ResolvedFinding }): ReactNode {
-  if (finding.reviewReason === null) {
-    return null;
-  }
-  return <p className={styles.reviewNote}>{REVIEW_REASONS[finding.reviewReason]}</p>;
+function Notes({ finding }: { readonly finding: ResolvedFinding }): ReactNode {
+  const searched = finding.verdict === 'silent' && finding.searchedTerms.length > 0;
+  return (
+    <>
+      {searched ? (
+        <p className={styles.note}>Searched your document for: {finding.searchedTerms.join(', ')}</p>
+      ) : null}
+      {finding.reviewReason === null ? null : (
+        <p className={styles.warn}>{REVIEW_REASONS[finding.reviewReason]}</p>
+      )}
+    </>
+  );
 }
 
-function SilentNote({ finding }: { readonly finding: ResolvedFinding }): ReactNode {
-  if (finding.verdict !== 'silent' || finding.searchedTerms.length === 0) {
-    return null;
-  }
-  return <p className={styles.counter}>Searched your document for: {finding.searchedTerms.join(', ')}</p>;
-}
-
-/**
- * Class names for one card. CSS-module lookups are `string | undefined` under
- * `noUncheckedIndexedAccess`, so they are defaulted here rather than in the JSX.
- */
-function cardClass(verdict: VerdictStyle): string {
-  const base = styles.card ?? '';
-  const tone = verdict.className ?? '';
-  return `${base} ${tone}`.trim();
+interface VerdictCardProps {
+  readonly row: ReportRow;
+  readonly selected: boolean;
+  readonly onShow: (beliefId: string) => void;
 }
 
 /** One belief, its verdict, and the evidence behind it. */
-export function VerdictCard({ row }: { readonly row: ReportRow }): ReactNode {
-  const verdict = VERDICTS[row.finding.verdict];
+export function VerdictCard({ row, selected, onShow }: VerdictCardProps): ReactNode {
+  const { finding } = row;
   return (
-    <li className={cardClass(verdict)}>
+    <li className={cx(styles.card, selected && styles.selected)}>
       <h3 className={styles.cardHeading}>
-        <span aria-hidden="true" className={styles.mark}>
-          {verdict.mark}
+        <VerdictBadge verdict={finding.verdict} />
+        <span className={styles.kind}>
+          {row.kind === 'promise' ? 'Something you were told' : 'Your belief'}
         </span>
-        {verdict.label}
       </h3>
       <p className={styles.said}>
-        {row.kind === 'promise' ? 'You were told: ' : 'You said: '}
         <q>{row.belief}</q>
       </p>
-      <p>{row.finding.explanation}</p>
-      {row.finding.evidence === null ? null : <SourceViewer evidence={row.finding.evidence} />}
-      <SilentNote finding={row.finding} />
-      <ReviewNote finding={row.finding} />
+      <p className={styles.explain}>{finding.explanation}</p>
+      {finding.evidence === null ? null : (
+        <SourceViewer
+          evidence={finding.evidence}
+          onShow={() => {
+            onShow(finding.beliefId);
+          }}
+        />
+      )}
+      <Notes finding={finding} />
     </li>
   );
 }

@@ -68,6 +68,10 @@ function toRows(findings: readonly ResolvedFinding[], drafts: readonly BeliefDra
 }
 
 function toWritingItem(row: ReportRow): WritingItem | null {
+  // A backed promise is already in writing, so asking for it again would only add noise.
+  if (row.finding.verdict === 'backed') {
+    return null;
+  }
   if (row.kind === 'promise') {
     return { id: row.finding.beliefId, text: row.belief, reason: 'promise' };
   }
@@ -77,14 +81,19 @@ function toWritingItem(row: ReportRow): WritingItem | null {
   return null;
 }
 
+/** The belief as it reads inside quotation marks, so a sentence never ends in “text.”. */
+function quoted(belief: string): string {
+  return `“${belief.replace(/[.!?]$/u, '')}”`;
+}
+
 function toQuestion(row: ReportRow): string | null {
   const clause = row.finding.evidence?.clause ?? null;
   if (row.finding.verdict === 'contradicted') {
     const where = clause ?? 'that clause';
-    return `The document says the opposite of “${row.belief}”. Can ${where} be changed before I sign?`;
+    return `The document says the opposite of ${quoted(row.belief)}. Can ${where} be changed before I sign?`;
   }
   if (row.finding.verdict === 'needs_review') {
-    return `I could not confirm what the document says about “${row.belief}”. What does it actually mean here?`;
+    return `I could not confirm what the document says about ${quoted(row.belief)}. What does it actually mean here?`;
   }
   return null;
 }

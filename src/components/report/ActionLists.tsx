@@ -5,7 +5,7 @@ import styles from '@/components/report/report.module.css';
 import { type WritingItem, writingRequest } from '@/lib/report';
 
 const REASON_NOTES: Readonly<Record<WritingItem['reason'], string>> = {
-  promise: 'You were told this, but the document does not say it.',
+  promise: 'You were told this, but the document does not confirm it.',
   silent: 'Your document never addresses this.',
 };
 

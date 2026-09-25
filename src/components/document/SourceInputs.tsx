@@ -56,7 +56,7 @@ export function PasteBox({ onPages }: { readonly onPages: PagesHandler }): React
         maxLength={LIMITS.maxDocumentChars}
         value={text}
         aria-describedby={`${pasteId}-count`}
-        placeholder="Paste your rent agreement, offer letter or contract here\u2026"
+        placeholder="Paste your rent agreement, offer letter or contract here…"
         onChange={(event) => {
           setText(event.target.value);
         }}

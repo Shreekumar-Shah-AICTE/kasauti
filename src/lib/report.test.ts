@@ -55,19 +55,25 @@ describe('buildReport', () => {
     expect(report.score).toEqual({ correct: 1, assessed: 3 });
   });
 
-  it('collects spoken promises and silent beliefs into the get-it-in-writing list', () => {
+  it('collects unconfirmed promises and silent beliefs into the get-it-in-writing list', () => {
     const report = buildReport(
-      [finding('a', 'backed'), finding('b', 'silent'), finding('c', 'backed')],
+      [finding('a', 'backed'), finding('b', 'silent'), finding('c', 'contradicted'), finding('d', 'backed')],
       [
         draft('a', 'Deposit refundable'),
         draft('b', 'Parking included'),
         draft('c', 'Rent frozen', 'promise'),
+        draft('d', 'Owner pays maintenance', 'promise'),
       ],
     );
     expect(report.writingList).toEqual([
-      { id: 'b', text: 'Parking included', reason: 'silent' },
       { id: 'c', text: 'Rent frozen', reason: 'promise' },
+      { id: 'b', text: 'Parking included', reason: 'silent' },
     ]);
+  });
+
+  it('quotes a belief without doubling its closing punctuation', () => {
+    const report = buildReport([finding('a', 'contradicted')], [draft('a', 'Deposit is refundable.')]);
+    expect(report.questions[0]).toContain('“Deposit is refundable”. Can');
   });
 
   it('names the clause in a contradiction question when evidence has one', () => {

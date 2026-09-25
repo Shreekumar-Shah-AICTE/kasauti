@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Evidence, ResolvedFinding, Verdict } from '@/core/verdict/types';
 import type { BeliefDraft } from '@/lib/checkerState';
-import { buildReport, exportText } from '@/lib/report';
+import { buildReport, exportText, writingRequest } from '@/lib/report';
 
 function evidence(clause: string | null): Evidence {
   return { tier: 'exact', text: 'One month rent is deducted.', start: 0, end: 27, page: 2, clause };
@@ -72,10 +72,10 @@ describe('buildReport', () => {
 
   it('names the clause in a contradiction question when evidence has one', () => {
     const withClause = buildReport(
-      [finding('a', 'contradicted', { evidence: evidence('8') })],
+      [finding('a', 'contradicted', { evidence: evidence('Clause 8') })],
       [draft('a', 'Deposit is refundable')],
     );
-    expect(withClause.questions[0]).toContain('clause 8');
+    expect(withClause.questions[0]).toContain('Clause 8');
   });
 
   it.each([
@@ -104,10 +104,46 @@ describe('buildReport', () => {
   });
 });
 
+describe('row order', () => {
+  it('puts contradictions first and confirmations last', () => {
+    const report = buildReport(
+      [
+        finding('a', 'backed'),
+        finding('b', 'silent'),
+        finding('c', 'contradicted'),
+        finding('d', 'needs_review'),
+      ],
+      [],
+    );
+    expect(report.rows.map((row) => row.finding.verdict)).toEqual([
+      'contradicted',
+      'needs_review',
+      'silent',
+      'backed',
+    ]);
+  });
+});
+
+describe('writingRequest', () => {
+  it('is empty when there is nothing to ask for', () => {
+    expect(writingRequest([])).toBe('');
+  });
+
+  it('numbers every item inside a message the user can send as it is', () => {
+    const text = writingRequest([
+      { id: 'a', text: 'Parking is included', reason: 'silent' },
+      { id: 'b', text: 'Deposit comes back in full', reason: 'promise' },
+    ]);
+    expect(text).toContain('1. Parking is included');
+    expect(text).toContain('2. Deposit comes back in full');
+    expect(text).toContain('in writing');
+  });
+});
+
 describe('exportText', () => {
   it('renders verdicts, quotes, the writing list and the questions', () => {
     const report = buildReport(
-      [finding('a', 'contradicted', { evidence: evidence('8') }), finding('b', 'silent')],
+      [finding('a', 'contradicted', { evidence: evidence('Clause 8') }), finding('b', 'silent')],
       [draft('a', 'Deposit is refundable'), draft('b', 'Parking included')],
     );
     const text = exportText(report);

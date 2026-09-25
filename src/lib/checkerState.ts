@@ -22,6 +22,11 @@ export interface CheckerState {
   readonly probes: readonly Probe[];
   readonly drafts: readonly BeliefDraft[];
   readonly findings: readonly ResolvedFinding[];
+  /**
+   * Example beliefs offered by a sample document. They are suggestions the user adds with one
+   * click, never pre-filled answers, so every belief that reaches the model was chosen or typed.
+   */
+  readonly examples: readonly BeliefInput[];
   readonly mode: Mode | null;
   readonly busy: boolean;
   readonly error: string | null;
@@ -43,6 +48,7 @@ export type CheckerAction =
   | { readonly type: 'draftChanged'; readonly id: string; readonly text: string }
   | { readonly type: 'promiseAdded' }
   | { readonly type: 'promiseRemoved'; readonly id: string }
+  | { readonly type: 'exampleAdded'; readonly id: string }
   | { readonly type: 'checkLoaded'; readonly findings: readonly ResolvedFinding[]; readonly mode: Mode }
   | { readonly type: 'busy' }
   | { readonly type: 'failed'; readonly message: string }
@@ -58,6 +64,7 @@ export const INITIAL_STATE: CheckerState = {
   probes: [],
   drafts: [],
   findings: [],
+  examples: [],
   mode: null,
   busy: false,
   error: null,
@@ -65,9 +72,11 @@ export const INITIAL_STATE: CheckerState = {
 };
 
 const PROMISE_PROMPT = 'What were you told, that is not in the document?';
+const EXAMPLE_PROMPT = 'Something people often believe about this document';
 
-function toDraft(belief: BeliefInput, prompt: string): BeliefDraft {
-  return { id: belief.id, kind: belief.kind, prompt, text: belief.text };
+function exampleDraft(example: BeliefInput): BeliefDraft {
+  const prompt = example.kind === 'promise' ? PROMISE_PROMPT : EXAMPLE_PROMPT;
+  return { id: example.id, kind: example.kind, prompt, text: example.text };
 }
 
 function probeDrafts(probes: readonly Probe[]): BeliefDraft[] {
@@ -88,7 +97,7 @@ export function canCheck(state: CheckerState): boolean {
 }
 
 const INPUT_ACTIONS = ['documentLoaded', 'sampleLoaded', 'roleChosen', 'probesLoaded'] as const;
-const DRAFT_ACTIONS = ['draftChanged', 'promiseAdded', 'promiseRemoved'] as const;
+const DRAFT_ACTIONS = ['draftChanged', 'promiseAdded', 'promiseRemoved', 'exampleAdded'] as const;
 
 type InputAction = Extract<CheckerAction, { type: (typeof INPUT_ACTIONS)[number] }>;
 type DraftAction = Extract<CheckerAction, { type: (typeof DRAFT_ACTIONS)[number] }>;
@@ -113,8 +122,7 @@ function reduceInput(state: CheckerState, action: InputAction): CheckerState {
         documentName: action.name,
         pages: action.pages,
         role: action.role,
-        drafts: action.beliefs.map((belief) => toDraft(belief, 'From this sample')),
-        promiseCount: action.beliefs.filter((belief) => belief.kind === 'promise').length,
+        examples: action.beliefs,
       };
     case 'roleChosen':
       return { ...state, role: action.role, error: null };
@@ -130,6 +138,29 @@ function reduceInput(state: CheckerState, action: InputAction): CheckerState {
   }
 }
 
+function addPromise(state: CheckerState): CheckerState {
+  if (state.drafts.length >= LIMITS.maxBeliefs) {
+    return state;
+  }
+  const count = state.promiseCount + 1;
+  const draft: BeliefDraft = {
+    id: `promise-${String(count)}`,
+    kind: 'promise',
+    prompt: PROMISE_PROMPT,
+    text: '',
+  };
+  return { ...state, promiseCount: count, drafts: [...state.drafts, draft] };
+}
+
+function addExample(state: CheckerState, id: string): CheckerState {
+  const example = state.examples.find((item) => item.id === id);
+  const present = state.drafts.some((draft) => draft.id === id);
+  if (example === undefined || present || state.drafts.length >= LIMITS.maxBeliefs) {
+    return state;
+  }
+  return { ...state, drafts: [...state.drafts, exampleDraft(example)] };
+}
+
 function reduceDrafts(state: CheckerState, action: DraftAction): CheckerState {
   switch (action.type) {
     case 'draftChanged':
@@ -139,22 +170,19 @@ function reduceDrafts(state: CheckerState, action: DraftAction): CheckerState {
           draft.id === action.id ? { ...draft, text: action.text } : draft,
         ),
       };
-    case 'promiseAdded': {
-      if (state.drafts.length >= LIMITS.maxBeliefs) {
-        return state;
-      }
-      const count = state.promiseCount + 1;
-      const draft: BeliefDraft = {
-        id: `promise-${String(count)}`,
-        kind: 'promise',
-        prompt: PROMISE_PROMPT,
-        text: '',
-      };
-      return { ...state, promiseCount: count, drafts: [...state.drafts, draft] };
-    }
+    case 'promiseAdded':
+      return addPromise(state);
     case 'promiseRemoved':
       return { ...state, drafts: state.drafts.filter((draft) => draft.id !== action.id) };
+    case 'exampleAdded':
+      return addExample(state, action.id);
   }
+}
+
+/** Examples the user has not added yet, in the order the sample lists them. */
+export function unusedExamples(state: CheckerState): BeliefInput[] {
+  const used = new Set(state.drafts.map((draft) => draft.id));
+  return state.examples.filter((example) => !used.has(example.id));
 }
 
 function reduceRequest(state: CheckerState, action: RequestAction): CheckerState {

@@ -68,12 +68,14 @@ keyed by a hash of the input, for the lifetime of the server instance.
 
 ## Documentation
 
-| File              | What it covers                                            |
-| ----------------- | --------------------------------------------------------- |
-| `ARCHITECTURE.md` | The layers, and why the trust boundary sits where it does |
-| `SECURITY.md`     | Input limits, rate limiting, CSP, what is not stored      |
-| `RISKS.md`        | Honest failure modes, including ones not yet fixed        |
-| `docs/adr/`       | Decisions that were expensive to make                     |
+| File                        | What it covers                                            |
+| --------------------------- | --------------------------------------------------------- |
+| `ARCHITECTURE.md`           | The layers, and why the trust boundary sits where it does |
+| `docs/GENAI_ARCHITECTURE.md` | Each GenAI service and exactly where it is integrated    |
+| `SECURITY.md`               | Input limits, rate limiting, CSP, what is not stored      |
+| `RISKS.md`                  | Honest failure modes, including ones not yet fixed        |
+| `docs/DEMO_SCRIPT.md`       | The recorded walkthrough, shot by shot                    |
+| `docs/adr/`                 | Decisions that were expensive to make                     |
 
 ## Limits
 

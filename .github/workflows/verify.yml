@@ -21,9 +21,12 @@ jobs:
         with:
           node-version: '24'
 
-      # `npm ci` is not used: package-lock.json is intentionally not committed.
+      # Exact versions are pinned in package.json; overrides patch transitive advisories.
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Verify
         run: npm run verify

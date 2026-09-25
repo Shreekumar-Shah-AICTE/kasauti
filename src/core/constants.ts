@@ -93,6 +93,12 @@ export const REPORT = {
   maxQuestions: 5,
 } as const;
 
+/** Display settings for the report's side-by-side document viewer. */
+export const UI = {
+  /** Characters of page text shown either side of a highlighted quote. */
+  contextChars: 700,
+} as const;
+
 /** HTTP status codes used by the API. */
 export const HTTP_STATUS = {
   badRequest: 400,

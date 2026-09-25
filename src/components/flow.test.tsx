@@ -12,6 +12,11 @@ import { RENT_AGREEMENT } from '@/samples/rentAgreement';
 const QUOTE =
   'the licence fee for the unexpired portion of the lock-in period shall become immediately payable';
 
+/** Escapes a belief's own text so it can be matched as an accessible name. */
+function escapeForRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+}
+
 /** The first sample belief comes back backed with a verified quote; the rest come back silent. */
 function findings(): ResolvedFinding[] {
   return RENT_AGREEMENT.beliefs.map((belief, index) =>
@@ -67,11 +72,18 @@ describe('the whole flow', () => {
     expect(screen.getByRole('heading', { name: /about to sign/ })).toBeDefined();
 
     await user.click(screen.getByRole('button', { name: /Next: your beliefs/ }));
+
+    const example = RENT_AGREEMENT.beliefs[0];
+    if (example === undefined) {
+      throw new Error('missing example');
+    }
+    await user.click(screen.getByRole('button', { name: new RegExp(escapeForRegExp(example.text)) }));
     await user.click(screen.getByRole('button', { name: /Check against the document/ }));
 
     expect(screen.getByRole('heading', { name: /What the document actually says/ })).toBeDefined();
-    expect(screen.getByText(QUOTE)).toBeDefined();
-    expect(screen.getByText(/Page 1/)).toBeDefined();
+    expect(screen.getAllByText(QUOTE)).toHaveLength(2);
+    expect(screen.getAllByText(/Page 1/).length).toBeGreaterThan(0);
+    expect(screen.getByRole('complementary', { name: /Your document/ })).toBeDefined();
     expect(screen.getByRole('heading', { name: /Ask for this in writing/ })).toBeDefined();
     expect(screen.getByRole('button', { name: /Copy report/ })).toBeDefined();
     expect(screen.queryByText(/nothing here was checked/)).toBeNull();

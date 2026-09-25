@@ -102,7 +102,8 @@ user is a test, not a promise."
 
 ## Do not
 
-- Do not use the **Or try a sample** buttons in the video. They pre-fill beliefs, which the rules
-  forbid. They exist for a judge clicking around, and for the 60-second walkthrough in `README.md`.
+- A sample document is fine to use in the video: samples no longer pre-fill any answer. They load
+  the document and offer example beliefs as chips, so the beliefs shown are still chosen on camera.
+  Type at least one belief yourself, so the teach-back is visibly live.
 - Do not cut away while a model call is in flight; the wait is the proof it is live.
 - Do not exceed 4 minutes. Cut the optional section first, then shorten section 0:00 – 0:20.

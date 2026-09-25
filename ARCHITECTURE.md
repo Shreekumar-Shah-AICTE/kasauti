@@ -8,6 +8,8 @@ that boundary visible and testable.
 ```
 browser        src/components/*            four steps, no decisions of their own
   │            src/lib/checkerState.ts     the whole flow as one pure reducer
+  │            src/lib/report.ts           report rows, ordered worst verdict first
+  │            src/lib/documentView.ts     places a verified quote back on its page
   │            src/lib/pdf/extractPages.ts PDF text extracted on the device
   ▼
 HTTP           src/app/api/{probes,check}  thin routes

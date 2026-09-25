@@ -1,0 +1,75 @@
+.docChip {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  margin: 0 0 1.25rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.93rem;
+}
+
+.docName {
+  font-weight: 700;
+  color: var(--brand-strong);
+}
+
+.roles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.roleCard {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.75rem;
+  align-items: center;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.roleCard:hover {
+  border-color: var(--brand);
+}
+
+.roleCard:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  box-shadow: var(--shadow);
+}
+
+.roleCard:has(input:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.roleIcon {
+  grid-row: span 2;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.roleLabel {
+  font-weight: 700;
+  color: var(--brand-strong);
+}
+
+.roleHint {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.legendTitle {
+  margin-bottom: 0.75rem;
+  padding: 0;
+  font-weight: 600;
+}

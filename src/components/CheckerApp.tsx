@@ -5,6 +5,7 @@ import { type ReactNode, useReducer } from 'react';
 import { BeliefStep } from '@/components/BeliefStep';
 import styles from '@/components/checker.module.css';
 import { DocumentStep } from '@/components/DocumentStep';
+import { ProgressPanel } from '@/components/flow/ProgressPanel';
 import { ReportStep } from '@/components/ReportStep';
 import { RoleStep } from '@/components/RoleStep';
 import { Stepper } from '@/components/Stepper';
@@ -17,7 +18,9 @@ import {
   type CheckerState,
   INITIAL_STATE,
   toBeliefs,
+  unusedExamples,
 } from '@/lib/checkerState';
+import { cx } from '@/lib/cx';
 
 type Dispatch = (action: CheckerAction) => void;
 
@@ -74,6 +77,8 @@ function RolePane({ state, dispatch }: PaneProps): ReactNode {
     <RoleStep
       role={state.role}
       busy={state.busy}
+      documentName={state.documentName}
+      pages={state.pages}
       onChoose={(role) => {
         dispatch({ type: 'roleChosen', role });
       }}
@@ -93,6 +98,7 @@ function BeliefPane({ state, dispatch }: PaneProps): ReactNode {
   return (
     <BeliefStep
       drafts={state.drafts}
+      examples={unusedExamples(state)}
       offline={state.mode === 'offline'}
       busy={state.busy}
       canCheck={canCheck(state)}
@@ -101,6 +107,9 @@ function BeliefPane({ state, dispatch }: PaneProps): ReactNode {
       }}
       onAddPromise={() => {
         dispatch({ type: 'promiseAdded' });
+      }}
+      onAddExample={(id) => {
+        dispatch({ type: 'exampleAdded', id });
       }}
       onRemovePromise={(id) => {
         dispatch({ type: 'promiseRemoved', id });
@@ -121,6 +130,8 @@ function ReportPane({ state, dispatch }: PaneProps): ReactNode {
       findings={state.findings}
       drafts={state.drafts}
       offline={state.mode === 'offline'}
+      documentName={state.documentName}
+      pages={state.pages}
       onBack={() => {
         dispatch({ type: 'back', step: 'beliefs' });
       }}
@@ -150,15 +161,17 @@ export function CheckerApp(): ReactNode {
   return (
     <>
       <Stepper step={state.step} />
-      <p className={styles.status} role="status">
-        {state.busy ? 'Working\u2026' : ''}
-      </p>
+      <div role="status">
+        <ProgressPanel step={state.step} busy={state.busy} />
+      </div>
       {state.error === null ? null : (
         <p className={styles.error} role="alert">
           {state.error}
         </p>
       )}
-      <StepPane state={state} dispatch={dispatch} />
+      <div className={cx(styles.stage, state.step === 'report' && styles.wide)}>
+        <StepPane state={state} dispatch={dispatch} />
+      </div>
     </>
   );
 }

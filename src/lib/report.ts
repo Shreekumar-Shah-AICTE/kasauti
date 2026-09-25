@@ -33,6 +33,21 @@ export interface Report {
   readonly questions: readonly string[];
 }
 
+/**
+ * Order in which verdicts are shown: what the user got wrong first, what they got right last.
+ * A signer with two minutes should meet the contradiction before the reassurance.
+ */
+const VERDICT_PRIORITY: Readonly<Record<Verdict, number>> = {
+  contradicted: 0,
+  needs_review: 1,
+  silent: 2,
+  backed: 3,
+};
+
+function byPriority(left: ReportRow, right: ReportRow): number {
+  return VERDICT_PRIORITY[left.finding.verdict] - VERDICT_PRIORITY[right.finding.verdict];
+}
+
 /** Plain-text verdict labels, used for the clipboard export. */
 const VERDICT_TEXT: Readonly<Record<Verdict, string>> = {
   backed: 'Backed by the document',
@@ -65,7 +80,7 @@ function toWritingItem(row: ReportRow): WritingItem | null {
 function toQuestion(row: ReportRow): string | null {
   const clause = row.finding.evidence?.clause ?? null;
   if (row.finding.verdict === 'contradicted') {
-    const where = clause === null ? 'that clause' : `clause ${clause}`;
+    const where = clause ?? 'that clause';
     return `The document says the opposite of “${row.belief}”. Can ${where} be changed before I sign?`;
   }
   if (row.finding.verdict === 'needs_review') {
@@ -79,10 +94,11 @@ function toQuestion(row: ReportRow): string | null {
  *
  * @param findings - Resolved findings from the API.
  * @param drafts - The answers the user wrote, used to show beliefs in their own words.
- * @returns The assembled report. Complexity: O(findings).
+ * @returns The assembled report, rows ordered contradicted → needs review → silent → backed
+ * (stable within a verdict). Complexity: O(f log f) for f findings.
  */
 export function buildReport(findings: readonly ResolvedFinding[], drafts: readonly BeliefDraft[]): Report {
-  const rows = toRows(findings, drafts);
+  const rows = toRows(findings, drafts).sort(byPriority);
   const tally = tallyVerdicts(findings);
   return {
     rows,
@@ -134,4 +150,28 @@ export function exportText(report: Report): string {
   return [...header, ...body, ...writing, ...questions, 'Kasauti gives information, not legal advice.'].join(
     '\n',
   );
+}
+
+/**
+ * Drafts a polite message asking the other side to put the open items in writing. It is the
+ * shortest path from "the document never says" to a written answer.
+ *
+ * @param items - The report's get-it-in-writing list.
+ * @returns A message ready to paste into email or chat; empty when there is nothing to ask.
+ * Complexity: O(items).
+ */
+export function writingRequest(items: readonly WritingItem[]): string {
+  if (items.length === 0) {
+    return '';
+  }
+  const lines = items.map((item, index) => `${String(index + 1)}. ${item.text}`);
+  return [
+    'Hello,',
+    '',
+    'Before I sign, could you please confirm the following in writing, ideally by adding it to the document itself:',
+    '',
+    ...lines,
+    '',
+    'Thank you.',
+  ].join('\n');
 }

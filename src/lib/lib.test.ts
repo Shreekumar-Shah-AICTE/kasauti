@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { LIMITS } from '@/core/constants';
+import type { BeliefInput } from '@/core/verdict/types';
 import { requestCheck, requestProbes } from '@/lib/api';
 import {
   type BeliefDraft,
@@ -8,8 +10,10 @@ import {
   type CheckerState,
   INITIAL_STATE,
   toBeliefs,
+  unusedExamples,
 } from '@/lib/checkerState';
 import { findSample, SAMPLES } from '@/samples';
+import type { SampleDocument } from '@/samples/types';
 
 const PAGES = ['Clause 8. One month rent is deducted towards painting on vacating.'];
 const PROBES = [{ id: 'tenant-deposit', topic: 'Deposit', question: 'How much deposit comes back?' }];
@@ -20,6 +24,33 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 function loaded(): CheckerState {
   return checkerReducer(INITIAL_STATE, { type: 'documentLoaded', name: 'lease.pdf', pages: PAGES });
+}
+
+function firstSample(): SampleDocument {
+  const sample = SAMPLES[0];
+  if (sample === undefined) {
+    throw new Error('missing sample');
+  }
+  return sample;
+}
+
+function withSample(): CheckerState {
+  const sample = firstSample();
+  return checkerReducer(INITIAL_STATE, {
+    type: 'sampleLoaded',
+    name: sample.title,
+    pages: sample.pages,
+    role: sample.role,
+    beliefs: sample.beliefs,
+  });
+}
+
+function firstExample(): BeliefInput {
+  const example = firstSample().beliefs[0];
+  if (example === undefined) {
+    throw new Error('missing example');
+  }
+  return example;
 }
 
 function withProbes(): CheckerState {
@@ -94,21 +125,48 @@ describe('checkerReducer', () => {
     expect(state).toMatchObject({ step: 'role', documentName: 'lease.pdf', pages: PAGES });
   });
 
-  it('prefills role and beliefs from a sample', () => {
-    const sample = SAMPLES[0];
-    if (sample === undefined) {
-      throw new Error('missing sample');
-    }
-    const state = checkerReducer(INITIAL_STATE, {
-      type: 'sampleLoaded',
-      name: sample.title,
-      pages: sample.pages,
-      role: sample.role,
-      beliefs: sample.beliefs,
-    });
+  it('offers a sample\u2019s beliefs as examples without answering for the user', () => {
+    const state = withSample();
     expect(state.role).toBe('tenant');
-    expect(state.drafts).toHaveLength(sample.beliefs.length);
-    expect(state.promiseCount).toBe(1);
+    expect(state.examples).toHaveLength(firstSample().beliefs.length);
+    expect(state.drafts).toHaveLength(0);
+    expect(state.promiseCount).toBe(0);
+  });
+
+  it('adds an example once, on request, and then stops offering it', () => {
+    const example = firstExample();
+    const state = checkerReducer(withSample(), { type: 'exampleAdded', id: example.id });
+    expect(state.drafts).toMatchObject([{ id: example.id, kind: example.kind, text: example.text }]);
+    expect(state.drafts[0]?.prompt.length).toBeGreaterThan(0);
+    expect(unusedExamples(state).some((item) => item.id === example.id)).toBe(false);
+    expect(checkerReducer(state, { type: 'exampleAdded', id: example.id }).drafts).toHaveLength(1);
+  });
+
+  it('keeps a spoken promise a promise when it is added from an example', () => {
+    const promise = firstSample().beliefs.find((belief) => belief.kind === 'promise');
+    if (promise === undefined) {
+      throw new Error('missing promise example');
+    }
+    const state = checkerReducer(withSample(), { type: 'exampleAdded', id: promise.id });
+    expect(state.drafts[0]?.kind).toBe('promise');
+    expect(state.drafts[0]?.prompt).toContain('told');
+  });
+
+  it('ignores an unknown example and one that would pass the belief limit', () => {
+    const sampled = withSample();
+    expect(checkerReducer(sampled, { type: 'exampleAdded', id: 'nope' }).drafts).toHaveLength(0);
+    const full: CheckerState = {
+      ...sampled,
+      drafts: Array.from({ length: LIMITS.maxBeliefs }, (_value, index) => ({
+        id: `filler-${String(index)}`,
+        kind: 'belief' as const,
+        prompt: 'q',
+        text: 'a',
+      })),
+    };
+    expect(checkerReducer(full, { type: 'exampleAdded', id: firstExample().id }).drafts).toHaveLength(
+      LIMITS.maxBeliefs,
+    );
   });
 
   it('records the chosen role', () => {

@@ -1,4 +1,5 @@
 import { LIMITS } from '@/core/constants';
+import { itemsToText } from '@/lib/pdf/layout';
 
 /**
  * Text extracted from a PDF, one entry per page.
@@ -11,15 +12,6 @@ export interface PdfExtraction {
   readonly pages: readonly string[];
   readonly empty: boolean;
   readonly truncated: boolean;
-}
-
-/** Joins one page's text items, which pdf.js returns as positioned fragments. */
-function itemsToText(items: readonly unknown[]): string {
-  return items
-    .map((item) => (typeof item === 'object' && item !== null && 'str' in item ? String(item.str) : ''))
-    .join(' ')
-    .replace(/[ \t]+/g, ' ')
-    .trim();
 }
 
 /**

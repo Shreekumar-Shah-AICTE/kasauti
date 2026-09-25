@@ -1,0 +1,58 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.7rem 0.2rem 0.3rem;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.mark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.backed {
+  background: var(--backed-tint);
+  color: var(--backed);
+}
+
+.backed .mark {
+  background: var(--backed);
+}
+
+.contradicted {
+  background: var(--contradicted-tint);
+  color: var(--contradicted);
+}
+
+.contradicted .mark {
+  background: var(--contradicted);
+}
+
+.silent {
+  background: var(--silent-tint);
+  color: var(--silent);
+}
+
+.silent .mark {
+  background: var(--silent);
+}
+
+.review {
+  background: var(--review-tint);
+  color: var(--review);
+}
+
+.review .mark {
+  background: var(--review);
+}

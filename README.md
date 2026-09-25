@@ -2,6 +2,8 @@
 
 **Test what you believe about a legal document — before you sign it.**
 
+**Live app: https://kasauti-pink.vercel.app**
+
 Most people do not misread contracts. They never read them, and sign on the strength of what they
 believe and what they were told. Kasauti checks the belief, not the document: you say what you think
 it says, and every answer comes back marked against your document's own words.
@@ -59,6 +61,18 @@ npm run verify   # typecheck → lint (0 warnings) → format → tests (100% co
 
 `npm run verify` is the only gate that matters: it is what CI runs on every push, and nothing is
 committed red.
+
+## Evidence, not claims
+
+| Claim                                | Where it is proved                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| Code overrules the model             | `src/core/verdict/policy.eval.test.ts`, an eval table of honest and dishonest replies |
+| Usable by keyboard and screen reader | `src/components/a11y.test.tsx` runs axe-core over the rendered app                    |
+| No known vulnerable dependency       | CI fails on any high-severity advisory (`npm audit --omit=dev`)                       |
+| No insecure code pattern             | CodeQL analysis on every push and weekly                                              |
+| Dependencies stay current            | Grouped weekly Dependabot updates, each gated by the same verify run                  |
+
+Colour contrast is checked by hand, because the test environment cannot compute colours.
 
 ## Privacy
 

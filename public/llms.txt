@@ -1,5 +1,7 @@
 # Kasauti
 
+> Live app: https://kasauti-pink.vercel.app
+
 > Test what you believe about a legal document before you sign it. The user says what they think
 > their contract says; Kasauti marks each belief against the document's own words, with a quote and
 > page number verified by code rather than by the model.

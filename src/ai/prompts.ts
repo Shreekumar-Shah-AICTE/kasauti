@@ -41,6 +41,7 @@ const CHECK_SYSTEM = [
   'kind "promise" means someone told the person this out loud; check whether the document keeps that promise.',
   'verdict "backed": the document clearly supports it. "contradicted": the document says something different.',
   'verdict "silent": the document does not address it at all. Silence matters: a spoken promise not in writing is weak.',
+  'Judge only the subject of the belief. If the closest clause covers an adjacent but different subject (a non-solicitation clause when the belief is about a non-compete, notice period when the belief is about severance), the verdict is "silent", not "backed" or "contradicted".',
   'For backed and contradicted, quote is copied character-for-character from the document: one sentence or clause.',
   'Never paraphrase a quote and never state page numbers; code finds them.',
   'For silent, quote is null and searchedTerms lists at least two distinct words or synonyms you looked for.',

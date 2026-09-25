@@ -1,290 +1,190 @@
+/* Flow-level layout shared by every step: stepper, progress, navigation, fields, banners. */
 .stepper {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.5rem;
+  margin: 0 0 1.75rem;
   padding: 0;
-  margin: 0 0 1.5rem;
   list-style: none;
-  font-size: 0.9rem;
+  counter-reset: step;
 }
 
-.stepItem {
-  color: var(--color-muted);
+.step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding-top: 0.65rem;
+  border-top: 4px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
 }
 
-.stepCurrent {
-  color: var(--color-brand);
-  font-weight: 600;
+.dot {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.done {
+  border-top-color: var(--brand);
+  color: var(--brand);
+}
+
+.done .dot {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: #fff;
+}
+
+.current {
+  border-top-color: var(--gold);
+  color: var(--brand-strong);
+  font-weight: 700;
+}
+
+.current .dot {
+  border-color: var(--gold);
+  color: var(--brand-strong);
+}
+
+.stage {
+  max-width: 52rem;
+}
+
+.wide {
+  max-width: none;
+}
+
+.help {
+  margin: 0 0 1rem;
+  color: var(--ink-soft);
 }
 
 .label {
   display: block;
-  margin: 1.25rem 0 0.35rem;
+  margin: 0 0 0.35rem;
   font-weight: 600;
-}
-
-.help {
-  color: var(--color-muted);
 }
 
 .textarea {
   width: 100%;
-  padding: 0.6rem;
+  padding: 0.7rem 0.8rem;
   font: inherit;
-  border: 1px solid #b9b4a7;
-  border-radius: 6px;
-  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   resize: vertical;
 }
 
-.file {
-  display: block;
-  padding: 0.4rem 0;
+.textarea:focus {
+  border-color: var(--brand);
 }
 
-.status {
-  min-height: 1.5rem;
-  color: var(--color-muted);
+.meta {
+  margin: 0.3rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
 }
 
-.error {
-  border-left: 4px solid #a12d2f;
-  padding: 0.5rem 0.75rem;
-  color: #7d1f21;
-  background: #fdf1f1;
-}
-
-.actions {
+.nav {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
   gap: 0.75rem;
-  margin-top: 1rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
 }
 
-.primary,
-.secondary,
-.sample,
-.link {
-  font: inherit;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.primary {
-  padding: 0.6rem 1.1rem;
-  border: 1px solid var(--color-brand);
-  background: var(--color-brand);
-  color: #fff;
-}
-
-.primary:disabled {
-  background: #8a94a3;
-  border-color: #8a94a3;
-  cursor: not-allowed;
-}
-
-.secondary {
-  padding: 0.6rem 1.1rem;
-  border: 1px solid var(--color-brand);
-  background: transparent;
-  color: var(--color-brand);
-}
-
-.link {
-  border: none;
-  background: none;
-  color: var(--color-brand);
-  text-decoration: underline;
-  padding: 0.25rem 0;
-}
-
-.fieldset {
-  border: 1px solid #d8d3c6;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-}
-
-.legend {
-  padding: 0 0.35rem;
-  font-weight: 600;
-}
-
-.choice {
+.progress {
   display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.35rem 0;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--gold);
+  border-radius: var(--radius);
+  background: var(--surface);
 }
 
-.samples {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0;
-  margin: 0.5rem 0 0;
-  list-style: none;
-}
-
-.sample {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d8d3c6;
-  background: #fff;
-}
-
-.sampleTitle {
-  display: block;
-  font-weight: 600;
-  color: var(--color-brand);
-}
-
-.sampleSummary {
-  display: block;
-  color: var(--color-muted);
-  font-size: 0.95rem;
-}
-
-.beliefList {
-  display: grid;
-  gap: 1.25rem;
-  padding: 0;
-  margin: 1rem 0 0;
-  list-style: none;
-}
-
-.beliefItem {
-  border: 1px solid #d8d3c6;
-  border-radius: 8px;
-  padding: 0.85rem 1rem;
-  background: #fff;
-}
-
-.prompt {
-  display: block;
-  margin-bottom: 0.4rem;
-  font-weight: 600;
-}
-
-.kind {
-  display: inline-block;
-  margin-bottom: 0.4rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  background: #eceade;
-  color: var(--color-muted);
-}
-
-.counter {
-  color: var(--color-muted);
-  font-size: 0.9rem;
-}
-
-.banner {
-  border-left: 4px solid #8a6d1f;
-  background: #fdf8e8;
-  padding: 0.6rem 0.85rem;
-  margin-bottom: 1rem;
-}
-
-.score {
-  font-size: 1.1rem;
-  margin: 0 0 var(--space) 0;
-}
-
-.cardList {
-  list-style: none;
-  margin: 0 0 calc(var(--space) * 1.5) 0;
-  padding: 0;
-}
-
-.card {
-  border: 1px solid #d8d3c6;
-  border-left-width: 6px;
-  border-radius: 4px;
-  margin-bottom: var(--space);
-  padding: var(--space);
-}
-
-.backed {
-  border-left-color: #2f6b3f;
-}
-
-.contradicted {
-  border-left-color: #a12d2f;
-}
-
-.silent {
-  border-left-color: #8a6d1f;
-}
-
-.review {
-  border-left-color: #8a94a3;
-}
-
-.cardHeading {
-  align-items: baseline;
-  display: flex;
-  font-size: 1rem;
-  gap: 0.5rem;
-  margin: 0 0 0.25rem 0;
-}
-
-.mark {
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.said {
-  color: var(--color-muted);
-  margin: 0 0 0.5rem 0;
-}
-
-.source {
-  background: #f4f1e6;
-  border-left: 3px solid #b9b4a7;
-  margin: var(--space) 0 0 0;
-  padding: 0.75rem;
-}
-
-.quote {
+.progress p {
   margin: 0;
 }
 
-.sourceMeta {
-  color: var(--color-muted);
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
+.progressTitle {
+  font-weight: 700;
+  color: var(--brand-strong);
 }
 
-.tier {
-  display: block;
+.spinner {
+  flex: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: 0.15rem;
+  border: 3px solid var(--line);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
 }
 
-.reviewNote {
-  color: #7d1f21;
-  font-size: 0.9rem;
-  margin: 0.5rem 0 0 0;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.exportBar {
-  border-top: 1px solid #d8d3c6;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: calc(var(--space) * 1.5);
-  padding-top: var(--space);
+.error {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border-left: 5px solid var(--contradicted);
+  border-radius: var(--radius-sm);
+  color: var(--contradicted);
+  background: var(--contradicted-tint);
+  font-weight: 600;
+}
+
+.banner {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border-left: 5px solid var(--silent);
+  border-radius: var(--radius-sm);
+  background: var(--silent-tint);
+}
+
+.liveBanner {
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+  border-left: 5px solid var(--brand);
+  border-radius: var(--radius-sm);
+  background: var(--brand-tint);
+}
+
+@media (max-width: 40rem) {
+  .stepLabel {
+    font-size: 0.8rem;
+  }
+
+  .step {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
 }
 
 @media print {
-  .exportBar,
-  .actions,
-  .stepper {
+  .stepper,
+  .nav,
+  .progress {
     display: none;
-  }
-
-  .card {
-    break-inside: avoid;
   }
 }

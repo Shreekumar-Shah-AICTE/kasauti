@@ -67,6 +67,7 @@ committed red.
 | Claim                                | Where it is proved                                                                    |
 | ------------------------------------ | ------------------------------------------------------------------------------------- |
 | Code overrules the model             | `src/core/verdict/policy.eval.test.ts`, an eval table of honest and dishonest replies |
+| It is right about real documents     | 32/33 hand-labelled beliefs, 0 unverifiable quotes — see `LIVE_VALIDATION.md`         |
 | Usable by keyboard and screen reader | `src/components/a11y.test.tsx` runs axe-core over the rendered app                    |
 | No known vulnerable dependency       | CI fails on any high-severity advisory (`npm audit --omit=dev`)                       |
 | No insecure code pattern             | CodeQL analysis on every push and weekly                                              |
@@ -88,6 +89,7 @@ keyed by a hash of the input, for the lifetime of the server instance.
 | `docs/GENAI_ARCHITECTURE.md` | Each GenAI service and exactly where it is integrated     |
 | `SECURITY.md`                | Input limits, rate limiting, CSP, what is not stored      |
 | `RISKS.md`                   | Honest failure modes, including ones not yet fixed        |
+| `LIVE_VALIDATION.md`         | Measured accuracy of the deployed app, and where it fails |
 | `docs/DEMO_SCRIPT.md`        | The recorded walkthrough, shot by shot                    |
 | `docs/adr/`                  | Decisions that were expensive to make                     |
 

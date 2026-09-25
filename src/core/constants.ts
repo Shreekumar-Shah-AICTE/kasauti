@@ -46,6 +46,11 @@ export const AI = {
   probeModel: 'gemini-3.5-flash-lite',
   /** Stronger model for the single batched belief check. */
   checkModel: 'gemini-3.8-flash',
+  /**
+   * Model used when the check model itself is unavailable to the deployment's API key
+   * (wrong tier, quota, or a retired id). Downgrading beats dropping to offline mode.
+   */
+  fallbackCheckModel: 'gemini-3.5-flash-lite',
   /** Hard timeout per model call. */
   timeoutMs: 20_000,
   /** Probe questions shown per document. */

@@ -1,6 +1,6 @@
-import { callStructured, type GenerateText } from '@/ai/client';
+import { type AiFailure, type AiResult, callStructured, type GenerateText } from '@/ai/client';
 import { offlineFinding, offlineFindings } from '@/ai/fallbackProvider';
-import { buildCheckPrompt, buildProbePrompt } from '@/ai/prompts';
+import { buildCheckPrompt, buildProbePrompt, type Prompt } from '@/ai/prompts';
 import {
   CHECK_JSON_SCHEMA,
   type CheckResponse,
@@ -25,11 +25,15 @@ export type Mode = 'live' | 'offline';
 export interface ProbeOutcome {
   readonly mode: Mode;
   readonly probes: readonly Probe[];
+  /** Why the model was not used. Present only in offline mode after an attempt. */
+  readonly failure?: AiFailure;
 }
 
 export interface CheckOutcome {
   readonly mode: Mode;
   readonly findings: readonly ResolvedFinding[];
+  /** Why the model was not used. Present only in offline mode after an attempt. */
+  readonly failure?: AiFailure;
 }
 
 function uniqueById(probes: readonly Probe[]): Probe[] {
@@ -67,7 +71,9 @@ export async function generateProbes(
     },
     deps.timeoutMs,
   );
-  return result.ok ? { mode: 'live', probes: uniqueById(result.value.probes) } : offline;
+  return result.ok
+    ? { mode: 'live', probes: uniqueById(result.value.probes) }
+    : { ...offline, failure: result.failure };
 }
 
 /**
@@ -87,6 +93,30 @@ function mergeFindings(
 }
 
 /**
+ * Runs the batched check, downgrading to the fallback model when the primary one is
+ * unreachable for this API key. A provider error on a specific model id must not cost the
+ * user a real verdict, while timeouts are not retried so latency stays bounded.
+ *
+ * @returns The validated model reply or the last failure. Complexity: at most four model calls.
+ */
+async function runCheckCall(
+  generate: GenerateText,
+  request: { readonly prompt: Prompt; readonly timeoutMs: number },
+): Promise<AiResult<CheckResponse>> {
+  const call = {
+    thinking: 'low',
+    prompt: request.prompt,
+    schema: CheckResponseSchema,
+    jsonSchema: CHECK_JSON_SCHEMA,
+  } as const;
+  const primary = await callStructured(generate, { ...call, model: AI.checkModel }, request.timeoutMs);
+  if (primary.ok || primary.failure !== 'provider_error') {
+    return primary;
+  }
+  return callStructured(generate, { ...call, model: AI.fallbackCheckModel }, request.timeoutMs);
+}
+
+/**
  * Checks every belief against the document in one batched model call, then applies the
  * deterministic verdict policy. Falls back to offline findings on any AI failure.
  *
@@ -99,25 +129,19 @@ export async function checkBeliefs(
   input: { readonly pages: readonly string[]; readonly beliefs: readonly BeliefInput[] },
 ): Promise<CheckOutcome> {
   const context = buildEvidenceContext(input.pages);
-  const offline = (): CheckOutcome => ({
+  const offline = (failure?: AiFailure): CheckOutcome => ({
     mode: 'offline',
     findings: offlineFindings(context, input.beliefs),
+    ...(failure === undefined ? {} : { failure }),
   });
   if (deps.generate === null) {
     return offline();
   }
-  const result = await callStructured(
-    deps.generate,
-    {
-      model: AI.checkModel,
-      thinking: 'low',
-      prompt: buildCheckPrompt(context.paged.text, input.beliefs),
-      schema: CheckResponseSchema,
-      jsonSchema: CHECK_JSON_SCHEMA,
-    },
-    deps.timeoutMs,
-  );
+  const result = await runCheckCall(deps.generate, {
+    prompt: buildCheckPrompt(context.paged.text, input.beliefs),
+    timeoutMs: deps.timeoutMs,
+  });
   return result.ok
     ? { mode: 'live', findings: mergeFindings(context, input.beliefs, result.value.findings) }
-    : offline();
+    : offline(result.failure);
 }

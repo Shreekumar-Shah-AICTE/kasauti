@@ -6,6 +6,7 @@ import { buildCheckPrompt, buildProbePrompt, neutralizeTags } from '@/ai/prompts
 import { buildRepairPrompt, parseStructured } from '@/ai/repair';
 import { PROBE_JSON_SCHEMA, ProbeResponseSchema, toModelSchema } from '@/ai/schemas';
 import { checkBeliefs, generateProbes } from '@/ai/service';
+import { AI } from '@/core/constants';
 import { buildEvidenceContext } from '@/core/verdict/policy';
 
 const HANG = Symbol('hang');
@@ -172,6 +173,30 @@ describe('service', () => {
     const { generate } = scripted([HANG]);
     const outcome = await checkBeliefs({ generate, timeoutMs: 5 }, { pages: PAGES, beliefs });
     expect(outcome.mode).toBe('offline');
+  });
+
+  it('downgrades to the fallback model when the check model is unavailable', async () => {
+    const reply = JSON.stringify({
+      findings: [
+        { beliefId: 'b1', verdict: 'silent', quote: null, searchedTerms: ['deposit'], explanation: 'No.' },
+        { beliefId: 'b2', verdict: 'silent', quote: null, searchedTerms: ['painting'], explanation: 'No.' },
+      ],
+    });
+    const { generate, calls } = scripted([new Error('404 model not found'), reply]);
+    const outcome = await checkBeliefs({ generate, timeoutMs: 50 }, { pages: PAGES, beliefs });
+    expect(outcome.mode).toBe('live');
+    expect(calls.map((call) => call.model)).toEqual([AI.checkModel, AI.fallbackCheckModel]);
+  });
+
+  it('reports why it went offline and does not retry a timeout on another model', async () => {
+    const { generate, calls } = scripted([HANG]);
+    const outcome = await checkBeliefs({ generate, timeoutMs: 5 }, { pages: PAGES, beliefs });
+    expect(outcome).toMatchObject({ mode: 'offline', failure: 'timeout' });
+    expect(calls).toHaveLength(1);
+    const probes = scripted([new Error('down')]);
+    await expect(
+      generateProbes({ generate: probes.generate, timeoutMs: 50 }, { role: 'tenant', documentText: 'x' }),
+    ).resolves.toMatchObject({ mode: 'offline', failure: 'provider_error' });
   });
 
   it('verifies live findings, drops unknown ids and covers skipped beliefs', async () => {

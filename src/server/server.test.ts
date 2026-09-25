@@ -174,8 +174,9 @@ describe('endpoints', () => {
     const handler = createCheckHandler(deps(generate));
     const first = await handler(post({ pages: PAGES, beliefs: BELIEFS }));
     await handler(post({ pages: PAGES, beliefs: BELIEFS }));
-    await expect(first.json()).resolves.toMatchObject({ mode: 'offline' });
-    expect(calls).toBe(2);
+    await expect(first.json()).resolves.toMatchObject({ mode: 'offline', failure: 'provider_error' });
+    // Two requests, each trying the check model and then the fallback model.
+    expect(calls).toBe(4);
   });
 
   it('caches live results so repeat checks cost no model call', async () => {

@@ -34,11 +34,22 @@ const FindingSchema = z.object({
     .nullable(),
 });
 
+/** Why the model was not used, when the server fell back to offline mode after trying. */
+const FailureSchema = z.enum(['timeout', 'provider_error', 'invalid_output']).optional();
+
 /** Response of `POST /api/probes`. */
-export const ProbeOutcomeSchema = z.object({ mode: ModeSchema, probes: z.array(ProbeSchema) });
+export const ProbeOutcomeSchema = z.object({
+  mode: ModeSchema,
+  probes: z.array(ProbeSchema),
+  failure: FailureSchema,
+});
 
 /** Response of `POST /api/check`. */
-export const CheckOutcomeSchema = z.object({ mode: ModeSchema, findings: z.array(FindingSchema) });
+export const CheckOutcomeSchema = z.object({
+  mode: ModeSchema,
+  findings: z.array(FindingSchema),
+  failure: FailureSchema,
+});
 
 /** Error envelope produced by `src/server/errors.ts`. */
 export const ApiErrorSchema = z.object({

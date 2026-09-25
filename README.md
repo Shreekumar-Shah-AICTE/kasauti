@@ -12,14 +12,17 @@ _Kasauti_ (कसौटी) is the touchstone — the stone used to test whether
 
 ## Try it in 60 seconds
 
-1. Open the app and click **Rent agreement** under _Or try a sample_.
+1. Open the app and click **Rent agreement** under _Try a sample_.
 2. Keep the pre-selected situation and click **Next: your beliefs**.
-3. The answers are pre-filled for the sample. Click **Check against the document**.
-4. Read the report:
+3. Answer in your own words, or click the chips under _Add a common belief_ to add beliefs people
+   really hold about a lease. Nothing is pre-filled: every belief checked is one you chose.
+4. Click **Check against the document** and read the report:
    - a **You were right** card, with the clause that backs it;
    - a **The document says otherwise** card — the deposit is not fully refundable;
    - a **The document never says** card, which becomes an _Ask for this in writing_ item.
-5. Click **Copy report** and paste it anywhere. That plain-text list is the thing a user actually
+5. Click **Show in document** on any card. The document opens beside the verdict with the quote
+   highlighted on its own page, at the offset code computed during verification.
+6. Click **Copy report** and paste it anywhere. That plain-text list is the thing a user actually
    sends to a landlord, an employer, or a lawyer.
 
 ## What makes it different
@@ -74,6 +77,17 @@ committed red.
 | Dependencies stay current            | Grouped weekly Dependabot updates, each gated by the same verify run                  |
 
 Colour contrast is checked by hand, because the test environment cannot compute colours.
+
+## Interface
+
+The screen is built for someone who is anxious and short of time: a numbered stepper, one decision
+per step, and a progress panel that names the model call being made rather than showing a bare
+spinner. The report leads with what the document contradicts, not with what it confirms.
+
+Every verdict carries an icon, a word and a colour, so it never depends on colour alone. Status and
+progress live in `aria-live` regions, the quote highlight is focused when it is requested, and the
+whole flow — including the report and its document panel — is checked with axe-core. There are no
+inline styles anywhere: the app runs under a strict, nonce-based CSP.
 
 ## Privacy
 

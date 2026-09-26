@@ -15,7 +15,11 @@ const BELIEFS = [{ id: 'b1', kind: 'belief', text: 'My deposit is fully refundab
 
 function post(body: unknown, headers: Record<string, string> = {}): Request {
   const text = typeof body === 'string' ? body : JSON.stringify(body);
-  return new Request('http://localhost/api', { method: 'POST', body: text, headers });
+  return new Request('http://localhost/api', {
+    method: 'POST',
+    body: text,
+    headers: { 'content-type': 'application/json', ...headers },
+  });
 }
 
 function deps(generate: GenerateText | null, allow = true): EndpointDeps {
@@ -26,7 +30,9 @@ describe('errorResponse', () => {
   it.each([
     ['invalid_json', 400],
     ['invalid_input', 422],
+    ['forbidden_origin', 403],
     ['payload_too_large', 413],
+    ['unsupported_media_type', 415],
     ['rate_limited', 429],
     ['internal', 500],
   ] as const)('maps %s to %i with no-store', async (code, status) => {
@@ -101,18 +107,18 @@ describe('createRateLimiter', () => {
   });
 
   it.each([
-    [{ 'x-forwarded-for': 'client-a, proxy-b' }, 'client-a'],
-    [{ 'x-real-ip': ' client-c ' }, 'client-c'],
+    [{ 'x-forwarded-for': 'client-a, proxy-b' }, hashKey('client-a')],
+    [{ 'x-real-ip': ' client-c ' }, hashKey('client-c')],
     [{ 'x-forwarded-for': ' ' }, 'anonymous'],
     [{}, 'anonymous'],
-  ])('derives the client key from %o', (headers, expected) => {
+  ])('derives a hashed client key from %o', (headers, expected) => {
     expect(clientKey(new Request('http://localhost', { headers }))).toBe(expected);
   });
 });
 
 describe('createCache', () => {
   it('returns stored values and evicts the least recently used', () => {
-    const cache = createCache<number>(2);
+    const cache = createCache<number>({ maxEntries: 2, ttlMs: 1_000, now: () => 0 });
     cache.set('a', 1);
     cache.set('b', 2);
     expect(cache.get('a')).toBe(1);
@@ -120,6 +126,14 @@ describe('createCache', () => {
     expect(cache.get('b')).toBeUndefined();
     expect(cache.get('a')).toBe(1);
     expect(cache.get('missing')).toBeUndefined();
+  });
+
+  it('expires entries after their time-to-live', () => {
+    let now = 0;
+    const cache = createCache<number>({ maxEntries: 2, ttlMs: 100, now: () => now });
+    cache.set('a', 1);
+    now = 100;
+    expect(cache.get('a')).toBeUndefined();
   });
 
   it('hashes equal input to equal keys', () => {
@@ -206,8 +220,34 @@ describe('endpoints', () => {
     expect(calls).toBe(1);
   });
 
+  it('shares one model call between identical requests in flight', async () => {
+    let calls = 0;
+    const generate: GenerateText = () => {
+      calls += 1;
+      return Promise.resolve(
+        JSON.stringify({ probes: [{ id: 'p1', topic: 'Deposit', question: 'What comes back?' }] }),
+      );
+    };
+    const handler = createProbesHandler(deps(generate));
+    const body = { role: 'tenant', pages: PAGES };
+    await Promise.all([handler(post(body)), handler(post(body))]);
+    expect(calls).toBe(1);
+  });
+
   it.each([
     { name: 'rate limited', endpointDeps: deps(null, false), request: post({}), status: 429 },
+    {
+      name: 'cross-site',
+      endpointDeps: deps(null),
+      request: post({}, { 'sec-fetch-site': 'cross-site' }),
+      status: 403,
+    },
+    {
+      name: 'a form post',
+      endpointDeps: deps(null),
+      request: post({}, { 'content-type': 'text/plain' }),
+      status: 415,
+    },
     { name: 'invalid JSON', endpointDeps: deps(null), request: post('{oops'), status: 400 },
     {
       name: 'declared oversize',

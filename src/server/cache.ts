@@ -6,29 +6,49 @@ export interface ResultCache<T> {
   readonly set: (key: string, value: T) => void;
 }
 
+/** Cache size, freshness and clock. `now` is injected so tests control time. */
+export interface CacheOptions {
+  /** Entries kept before the least recently used is evicted (bounds memory). */
+  readonly maxEntries: number;
+  /** Milliseconds an entry stays fresh; stale entries are dropped on read. */
+  readonly ttlMs: number;
+  readonly now: () => number;
+}
+
+interface Entry<T> {
+  readonly value: T;
+  readonly expiresAt: number;
+}
+
 /**
- * Creates an in-memory LRU cache so re-checking the same document and beliefs costs no
- * model call. Only a hash is used as the key; the document itself is never stored as a key.
+ * Creates an in-memory LRU cache with a time-to-live, so re-checking the same document and
+ * beliefs costs no model call while stale answers still expire. Only a hash is used as the key;
+ * the document itself is never stored as a key.
  *
- * @param maxEntries - Entries kept before the least recently used is evicted.
- * @returns The cache. Complexity: O(1) per operation.
+ * @param options - Size bound, time-to-live and clock.
+ * @returns The cache. Complexity: O(1) per operation, O(maxEntries) memory.
  */
-export function createCache<T>(maxEntries: number): ResultCache<T> {
-  const entries = new Map<string, T>();
+export function createCache<T>(options: CacheOptions): ResultCache<T> {
+  const entries = new Map<string, Entry<T>>();
   return {
     get: (key) => {
-      const value = entries.get(key);
-      if (value !== undefined) {
-        entries.delete(key);
-        entries.set(key, value);
+      const entry = entries.get(key);
+      if (entry === undefined) {
+        return undefined;
       }
-      return value;
+      entries.delete(key);
+      if (entry.expiresAt <= options.now()) {
+        return undefined;
+      }
+      // Re-inserting moves the key to the end, so Map order tracks recency.
+      entries.set(key, entry);
+      return entry.value;
     },
     set: (key, value) => {
       entries.delete(key);
-      entries.set(key, value);
+      entries.set(key, { value, expiresAt: options.now() + options.ttlMs });
       const oldest = entries.keys().next();
-      if (entries.size > maxEntries && oldest.done !== true) {
+      if (entries.size > options.maxEntries && oldest.done !== true) {
         entries.delete(oldest.value);
       }
     },

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { LIMITS } from '@/core/constants';
+import { CLIENT, LIMITS } from '@/core/constants';
 import type { BeliefInput } from '@/core/verdict/types';
 import { requestCheck, requestProbes } from '@/lib/api';
 import {
@@ -116,6 +116,24 @@ describe('api client', () => {
   ])('fails safely on %s', async (_name, fetcher, code) => {
     const result = await requestProbes({ role: 'tenant', pages: PAGES }, fetcher);
     expect(!result.ok && result.error.code).toBe(code);
+  });
+
+  it('gives up on a hung request instead of spinning forever', async () => {
+    vi.useFakeTimers();
+    try {
+      const hung = (_path: string, init: RequestInit): Promise<Response> =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () => {
+            reject(new Error('aborted'));
+          });
+        });
+      const pending = requestProbes({ role: 'tenant', pages: PAGES }, hung);
+      await vi.advanceTimersByTimeAsync(CLIENT.requestTimeoutMs);
+      const result = await pending;
+      expect(!result.ok && result.error.code).toBe('timeout');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

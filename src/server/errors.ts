@@ -2,7 +2,13 @@ import { HTTP_STATUS } from '@/core/constants';
 
 /** Client-safe error codes. Each maps to a fixed message so internals never leak. */
 export type ApiErrorCode =
-  'invalid_json' | 'invalid_input' | 'payload_too_large' | 'rate_limited' | 'internal';
+  | 'invalid_json'
+  | 'invalid_input'
+  | 'forbidden_origin'
+  | 'payload_too_large'
+  | 'unsupported_media_type'
+  | 'rate_limited'
+  | 'internal';
 
 interface ErrorDetail {
   readonly status: number;
@@ -17,6 +23,14 @@ const DETAILS: Readonly<Record<ApiErrorCode, ErrorDetail>> = {
   invalid_input: {
     status: HTTP_STATUS.unprocessable,
     message: 'Some input is missing, too short or too long. Check the highlighted fields.',
+  },
+  forbidden_origin: {
+    status: HTTP_STATUS.forbidden,
+    message: 'This request did not come from the Kasauti app, so it was refused.',
+  },
+  unsupported_media_type: {
+    status: HTTP_STATUS.unsupportedMediaType,
+    message: 'The request must be sent as JSON.',
   },
   payload_too_large: {
     status: HTTP_STATUS.payloadTooLarge,

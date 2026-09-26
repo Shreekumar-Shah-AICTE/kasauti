@@ -81,6 +81,8 @@ export const SERVER = {
   rateLimitMaxClients: 5_000,
   /** Live results kept in the hash-keyed cache. */
   cacheEntries: 100,
+  /** How long a cached live result is reused before the model is asked again (30 minutes). */
+  cacheTtlMs: 1_800_000,
   /** Letters a belief or document needs before it counts as meaningful text (rejects gibberish like "??"). */
   minMeaningfulLetters: 3,
   /** Maximum characters in one belief or promise. */
@@ -102,10 +104,21 @@ export const UI = {
 /** HTTP status codes used by the API. */
 export const HTTP_STATUS = {
   badRequest: 400,
+  forbidden: 403,
   payloadTooLarge: 413,
+  unsupportedMediaType: 415,
   unprocessable: 422,
   tooManyRequests: 429,
   internal: 500,
+} as const;
+
+/** Browser-side request settings. */
+export const CLIENT = {
+  /**
+   * The browser gives up on an API call after this long. It covers the server's worst case
+   * (model call, one repair retry and the fallback model, each capped by `AI.timeoutMs`).
+   */
+  requestTimeoutMs: 90_000,
 } as const;
 
 /** Milliseconds in one minute. */

@@ -10,7 +10,9 @@ export type SecurityHeaderName =
   | 'Referrer-Policy'
   | 'Permissions-Policy'
   | 'Cross-Origin-Opener-Policy'
-  | 'Cross-Origin-Resource-Policy';
+  | 'Cross-Origin-Resource-Policy'
+  | 'X-Permitted-Cross-Domain-Policies'
+  | 'X-DNS-Prefetch-Control';
 
 export type SecurityHeaders = Readonly<Record<SecurityHeaderName, string>>;
 
@@ -54,9 +56,12 @@ export function securityHeaders(nonce: string, isDev: boolean): SecurityHeaders 
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'no-referrer',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+    'Permissions-Policy':
+      'camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=(), browsing-topics=()',
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Resource-Policy': 'same-origin',
+    'X-Permitted-Cross-Domain-Policies': 'none',
+    'X-DNS-Prefetch-Control': 'off',
   };
 }
 

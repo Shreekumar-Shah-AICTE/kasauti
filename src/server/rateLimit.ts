@@ -1,3 +1,5 @@
+import { hashKey } from '@/server/cache';
+
 /** Token-bucket settings. `now` is injected so tests control time. */
 export interface RateLimitOptions {
   /** Requests a client may burst before throttling. */
@@ -59,17 +61,23 @@ export function createRateLimiter(options: RateLimitOptions): RateLimiter {
   };
 }
 
-/**
- * Identifies the caller for rate limiting. On Vercel `x-forwarded-for` is set by the platform,
- * so its first entry is the real client address.
- *
- * @param request - Incoming request.
- * @returns A best-effort client key. Complexity: O(header length).
- */
-export function clientKey(request: Request): string {
+function clientAddress(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? '';
   if (forwarded !== '') {
     return forwarded;
   }
-  return request.headers.get('x-real-ip')?.trim() ?? 'anonymous';
+  return request.headers.get('x-real-ip')?.trim() ?? '';
+}
+
+/**
+ * Identifies the caller for rate limiting. On Vercel `x-forwarded-for` is set by the platform,
+ * so its first entry is the real client address. The address is hashed, so no raw IP address
+ * is ever held in memory.
+ *
+ * @param request - Incoming request.
+ * @returns A SHA-256 hash of the client address, or `anonymous`. Complexity: O(header length).
+ */
+export function clientKey(request: Request): string {
+  const address = clientAddress(request);
+  return address === '' ? 'anonymous' : hashKey(address);
 }

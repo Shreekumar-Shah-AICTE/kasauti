@@ -5,6 +5,7 @@ import { PAGE_SEPARATOR, SERVER } from '@/core/constants';
 import { createCache, hashKey } from '@/server/cache';
 import { ApiError, errorResponse, NO_STORE } from '@/server/errors';
 import { clientKey, type RateLimiter } from '@/server/rateLimit';
+import { assertJsonBody, assertSameOrigin } from '@/server/requestGuards';
 import { CheckRequestSchema, parseRequest, ProbeRequestSchema } from '@/server/validateInput';
 
 /** Everything an endpoint needs, injected so tests never touch the network. */
@@ -41,23 +42,51 @@ async function readJson(request: Request): Promise<unknown> {
 }
 
 /**
- * Wraps one API operation with the shared pipeline: rate limit → size cap → JSON parse →
- * zod validation → cache → run → sanitised response. Only live results are cached, so a
- * transient outage never pins a user to offline mode.
+ * Runs `run` once per key at a time: identical requests that arrive while the first is still
+ * waiting on the model share its promise instead of each paying for a model call.
+ */
+function createCoalescer<T, R>(run: (input: T) => Promise<R>): (key: string, input: T) => Promise<R> {
+  const inFlight = new Map<string, Promise<R>>();
+  return (key, input) => {
+    const pending = inFlight.get(key);
+    if (pending !== undefined) {
+      return pending;
+    }
+    const started = run(input).finally(() => inFlight.delete(key));
+    inFlight.set(key, started);
+    return started;
+  };
+}
+
+function guard(request: Request, allow: RateLimiter): void {
+  assertSameOrigin(request);
+  assertJsonBody(request);
+  if (!allow(clientKey(request))) {
+    throw new ApiError('rate_limited');
+  }
+}
+
+/**
+ * Wraps one API operation with the shared pipeline: same-origin and content-type guards → rate
+ * limit → size cap → JSON parse → zod validation → cache → coalesced run → sanitised response.
+ * Only live results are cached, so a transient outage never pins a user to offline mode.
  */
 function createEndpoint<T, R extends { readonly mode: Mode }>(
   deps: EndpointDeps,
   spec: EndpointSpec<T, R>,
 ): Handler {
-  const cache = createCache<R>(SERVER.cacheEntries);
+  const cache = createCache<R>({
+    maxEntries: SERVER.cacheEntries,
+    ttlMs: SERVER.cacheTtlMs,
+    now: () => Date.now(),
+  });
+  const runOnce = createCoalescer(spec.run);
   return async (request) => {
     try {
-      if (!deps.allow(clientKey(request))) {
-        throw new ApiError('rate_limited');
-      }
+      guard(request, deps.allow);
       const input = parseRequest(spec.schema, await readJson(request));
       const key = hashKey(input);
-      const result = cache.get(key) ?? (await spec.run(input));
+      const result = cache.get(key) ?? (await runOnce(key, input));
       if (result.mode === 'live') {
         cache.set(key, result);
       }

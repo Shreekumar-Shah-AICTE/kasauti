@@ -42,9 +42,21 @@ Enforced server-side in `src/server/validateInput.ts` and `src/core/constants.ts
 Oversized bodies are rejected with `413` before parsing. Invalid shapes get `422` with field names.
 Gibberish (fewer than three letters of real text) is rejected rather than sent to the model.
 
+## Cross-site abuse
+
+The API only serves this app's own pages (`src/server/requestGuards.ts`):
+
+- A browser request whose `Sec-Fetch-Site` is not `same-origin`, or whose `Origin` host differs from
+  the request host, is refused with `403`. Another website cannot spend this deployment's model quota
+  through a visitor's browser.
+- Bodies must be `application/json`, otherwise `415`. That also rules out "simple" cross-site form
+  posts, which browsers may send without a CORS preflight.
+- No CORS headers are sent, so cross-origin scripts cannot read a response either.
+
 ## Rate limiting
 
-A token bucket per client IP: burst of 10, refilled at 10 per minute, tracking at most 5,000 clients
+A token bucket per client, keyed by a SHA-256 hash of the client IP so no raw address is held in
+memory: burst of 10, refilled at 10 per minute, tracking at most 5,000 clients
 with least-recently-seen eviction (`src/server/rateLimit.ts`). Over the limit returns `429`.
 
 **This is per server instance, in memory.** On a platform that runs several instances the effective
@@ -59,7 +71,17 @@ Set in `src/middleware.ts` / `src/server/securityHeaders.ts`:
   `style-src 'self' 'nonce-…'`, `worker-src 'self' blob:` for the PDF worker, no `unsafe-inline` in
   production. Consequently the codebase contains no inline `style` attributes.
 - `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`,
-  `X-Frame-Options: DENY`, and a `Permissions-Policy` denying camera, microphone and geolocation.
+  `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy` / `Cross-Origin-Resource-Policy: same-origin`,
+  `X-Permitted-Cross-Domain-Policies: none`, `X-DNS-Prefetch-Control: off`, and a `Permissions-Policy`
+  denying camera, microphone, geolocation, payment, USB, motion sensors and topics.
+
+## Supply chain
+
+- `package-lock.json` is committed and CI installs with `npm ci`, so every build uses the exact
+  audited dependency tree. Direct dependencies are pinned to exact versions in `package.json`.
+- CI fails on any high-severity advisory in production dependencies (`npm audit --omit=dev`).
+- Every GitHub Action is pinned to a full commit SHA, so a moved tag cannot change what CI runs.
+- CodeQL runs on every push and weekly; Dependabot proposes grouped weekly updates.
 
 ## Secrets
 
@@ -67,5 +89,7 @@ Set in `src/middleware.ts` / `src/server/securityHeaders.ts`:
 not a crash. No secret is committed; `.env*` is ignored.
 
 ## Reporting
+
+Machine-readable contact: `/.well-known/security.txt` (RFC 9116).
 
 Open an issue in this repository. Please do not include real contract text in a report.

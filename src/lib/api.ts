@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 
+import { CLIENT } from '@/core/constants';
 import type { Role } from '@/core/probes/fallbackBank';
 import type { BeliefInput } from '@/core/verdict/types';
 import {
@@ -27,6 +28,11 @@ const OFFLINE: ApiFailure = {
   message: 'Could not reach the server. Check your connection and try again.',
 };
 
+const TIMED_OUT: ApiFailure = {
+  code: 'timeout',
+  message: 'The check is taking too long. Please try again in a moment.',
+};
+
 const UNREADABLE: ApiFailure = {
   code: 'bad_response',
   message: 'The server sent something unexpected. Please try again.',
@@ -51,15 +57,23 @@ async function postJson<T>(
   body: unknown,
   options: { readonly schema: z.ZodType<T>; readonly fetcher: Fetcher },
 ): Promise<ApiResult<T>> {
+  // A hung connection must not leave the user on a spinner forever.
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, CLIENT.requestTimeoutMs);
   let response: Response;
   try {
     response = await options.fetcher(path, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
   } catch {
-    return { ok: false, error: OFFLINE };
+    return { ok: false, error: controller.signal.aborted ? TIMED_OUT : OFFLINE };
+  } finally {
+    clearTimeout(timer);
   }
   const payload = await readBody(response);
   if (!response.ok) {

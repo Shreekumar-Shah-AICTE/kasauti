@@ -102,9 +102,37 @@ ask the model to lie. See `docs/GENAI_ARCHITECTURE.md`.
 | The whole flow works                   | `src/components/flow.test.tsx` drives sample → beliefs → report with a stubbed API    |
 | Usable by keyboard and screen reader   | `src/components/a11y.test.tsx` runs axe-core over the app and the report              |
 | No known vulnerable dependency         | CI fails on any high-severity advisory (`npm audit --omit=dev`)                       |
+| Reproducible, tamper-resistant builds  | Committed lockfile + `npm ci`; every GitHub Action pinned to a commit SHA             |
 | No insecure code pattern               | CodeQL analysis on every push and weekly                                              |
 | Dependencies stay current              | Grouped weekly Dependabot updates, each gated by the same verify run                  |
 | Decisions were reasoned, not defaulted | Six ADRs in `docs/adr/`, including the ones that cost us something                    |
+
+### Security, in one table
+
+| Threat                                 | Mitigation                                                    | Where                           |
+| -------------------------------------- | ------------------------------------------------------------- | ------------------------------- |
+| A contract that tells the model to lie | Fenced, tag-defanged document text; schema-locked output      | `src/ai/prompts.ts`             |
+| An invented quote                      | Code re-finds every quote; unverifiable → _needs review_      | `src/core/verdict/policy.ts`    |
+| Another site spending our model quota  | `Sec-Fetch-Site`/`Origin` check (403), JSON-only bodies (415) | `src/server/requestGuards.ts`   |
+| Floods and loops                       | Per-client token bucket on a hashed IP (429)                  | `src/server/rateLimit.ts`       |
+| Oversized or malformed input           | Byte cap before parsing (413), strict zod schemas (422)       | `src/server/validateInput.ts`   |
+| XSS, clickjacking, sniffing            | Nonce CSP with `strict-dynamic`, `frame-ancestors 'none'`, …  | `src/server/securityHeaders.ts` |
+| Leaked key or stack trace              | Server-only key; fixed client-safe error messages             | `src/server/errors.ts`          |
+| Stored personal documents              | Nothing stored or logged; cache keys are SHA-256 hashes       | `src/server/cache.ts`           |
+
+### Efficiency, by design
+
+- **Two model calls per document, never one per belief.** Probes read only the first 12,000
+  characters; every belief is checked in one batched call (ADR 0005).
+- **Repeat work is free.** Live results are cached by a SHA-256 of the validated input (LRU, 100
+  entries, 30-minute TTL), and identical requests already in flight share one model call.
+- **Cheap before expensive.** Size, origin, content-type and rate-limit checks run before the body
+  is parsed; quote verification tries exact, then normalised matching, and only then an O(n)
+  rolling word-overlap filter that gates the O(m²) edit-distance check.
+- **Nothing blocks forever.** Each model call has a 20 s abort; the browser abandons a request
+  after 90 s with a clear message.
+- **Small client.** pdf.js is loaded with a dynamic `import()` only when a PDF is chosen, and runs
+  in a worker. Six runtime dependencies in total.
 
 ### Measured against the deployed app, not a mock
 

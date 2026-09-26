@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 
 import styles from '@/components/checker.module.css';
 import { QuestionList, WritingList } from '@/components/report/ActionLists';
@@ -101,7 +101,9 @@ function EvidenceGrid({ rows, documentName, pages }: EvidenceGridProps): ReactNo
  * the model, so a confident-sounding answer can never invent its own evidence.
  */
 export function ReportStep(props: ReportStepProps): ReactNode {
-  const built = buildReport(props.findings, props.drafts);
+  // The report only changes with new findings, so parent re-renders reuse it.
+  const built = useMemo(() => buildReport(props.findings, props.drafts), [props.findings, props.drafts]);
+  const exported = useMemo(() => exportText(built), [built]);
   return (
     <section aria-labelledby="report-heading">
       <h2 id="report-heading">What the document actually says</h2>
@@ -114,7 +116,7 @@ export function ReportStep(props: ReportStepProps): ReactNode {
         <QuestionList questions={built.questions} />
       </div>
       <p className={report.notice}>Kasauti gives information, not legal advice.</p>
-      <ExportButton text={exportText(built)} />
+      <ExportButton text={exported} />
       <ReportActions onBack={props.onBack} onRestart={props.onRestart} />
     </section>
   );

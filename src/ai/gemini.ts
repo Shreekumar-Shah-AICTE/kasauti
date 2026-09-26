@@ -1,6 +1,7 @@
 import { GoogleGenAI, ThinkingLevel } from '@google/genai';
 
 import type { GenerateText, Thinking } from '@/ai/client';
+import { AI } from '@/core/constants';
 
 const LEVELS: Readonly<Record<Exclude<Thinking, null>, ThinkingLevel>> = {
   low: ThinkingLevel.LOW,
@@ -25,6 +26,7 @@ export function createGeminiGenerate(apiKey: string): GenerateText {
         systemInstruction: request.system,
         responseMimeType: 'application/json',
         responseJsonSchema: request.jsonSchema,
+        maxOutputTokens: AI.maxOutputTokens,
         abortSignal: request.signal,
         ...(request.thinking === null ? {} : { thinkingConfig: { thinkingLevel: LEVELS[request.thinking] } }),
       },

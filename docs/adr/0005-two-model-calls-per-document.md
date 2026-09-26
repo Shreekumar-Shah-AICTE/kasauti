@@ -17,7 +17,7 @@ Exactly two calls, both bounded:
 2. **Check** — one call takes every belief at once and returns one finding per belief.
 
 A schema-invalid reply gets a single repair attempt that echoes the validation error back; a second
-failure falls through to offline mode rather than looping. Each call has a 20 second timeout. Live
+failure falls through to offline mode rather than looping. Each call has a 45 second timeout. Live
 results are cached in memory against a hash of the input, so re-running the same sample costs
 nothing.
 

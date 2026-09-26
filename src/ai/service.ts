@@ -9,6 +9,7 @@ import {
   ProbeResponseSchema,
 } from '@/ai/schemas';
 import { AI } from '@/core/constants';
+import { selectForModel } from '@/core/evidence/select';
 import { fallbackProbes, type Probe, type Role } from '@/core/probes/fallbackBank';
 import { buildEvidenceContext, type EvidenceContext, resolveFinding } from '@/core/verdict/policy';
 import type { BeliefInput, ResolvedFinding } from '@/core/verdict/types';
@@ -116,6 +117,16 @@ async function runCheckCall(
   return callStructured(generate, { ...call, model: AI.fallbackCheckModel }, request.timeoutMs);
 }
 
+/** The document text the model reads: whole when short, trimmed to relevant clauses when long. */
+function modelText(context: EvidenceContext, beliefs: readonly BeliefInput[]): string {
+  return selectForModel({
+    text: context.paged.text,
+    clauses: context.clauses,
+    queries: beliefs.map((belief) => belief.text),
+    budget: AI.checkBudgetChars,
+  }).text;
+}
+
 /**
  * Checks every belief against the document in one batched model call, then applies the
  * deterministic verdict policy. Falls back to offline findings on any AI failure.
@@ -138,7 +149,7 @@ export async function checkBeliefs(
     return offline();
   }
   const result = await runCheckCall(deps.generate, {
-    prompt: buildCheckPrompt(context.paged.text, input.beliefs),
+    prompt: buildCheckPrompt(modelText(context, input.beliefs), input.beliefs),
     timeoutMs: deps.timeoutMs,
   });
   return result.ok

@@ -57,6 +57,14 @@ export const AI = {
   maxProbes: 3,
   /** Characters of the document sent when writing probes (the opening pages carry the key terms). */
   probeExcerptChars: 12_000,
+  /**
+   * Characters of the document the batched check reads. Longer documents are cut to the clauses
+   * that share keywords with the beliefs (see core/evidence/select.ts); quotes are still verified
+   * against the full text.
+   */
+  checkBudgetChars: 32_000,
+  /** Output-token ceiling per call (thinking included): bounds latency and cost of a runaway reply. */
+  maxOutputTokens: 8_192,
   maxIdChars: 40,
   maxTopicChars: 60,
   maxQuestionChars: 240,
@@ -119,6 +127,8 @@ export const CLIENT = {
    * (model call, one repair retry and the fallback model, each capped by `AI.timeoutMs`).
    */
   requestTimeoutMs: 90_000,
+  /** Live API results kept per endpoint in the tab, so re-checking unchanged input is instant. */
+  memoEntries: 10,
 } as const;
 
 /** Milliseconds in one minute. */

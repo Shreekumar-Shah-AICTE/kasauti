@@ -131,6 +131,13 @@ ask the model to lie. See `docs/GENAI_ARCHITECTURE.md`.
   rolling word-overlap filter that gates the O(m²) edit-distance check.
 - **Nothing blocks forever.** Each model call has a 45 s abort; the browser abandons a request
   after 90 s with a clear message.
+- **Send only what the model reads.** The browser uploads just the first 12,000 characters for
+  probes; a document longer than 32,000 characters is cut to the clauses that share keywords with
+  the beliefs before the check call, and quotes are still verified against the full text (ADR 0007).
+- **Bounded output.** Every call caps `maxOutputTokens`, so a runaway reply cannot hold the function
+  open.
+- **No repeat round trips.** Re-checking unchanged beliefs is answered from an in-tab memo of live
+  results; PDF pages are extracted concurrently; the report is memoised so re-renders reuse it.
 - **Small client.** pdf.js is loaded with a dynamic `import()` only when a PDF is chosen, and runs
   in a worker. Six runtime dependencies in total.
 

@@ -19,11 +19,12 @@ browser never calls Google directly — both model calls happen inside route han
 ```
 step 1  document        no model call (PDF parsed in the browser)
 step 2  role       ──▶  MODEL CALL 1  gemini-3.5-flash-lite   src/ai/prompts.ts:probePrompt
-                        in:  role + capped document excerpt
+                        in:  role + first 12,000 chars (trimmed in the browser)
                         out: up to 3 questions  → validated by src/ai/schemas.ts
 step 3  beliefs         no model call (the user types)
 step 3→4 check     ──▶  MODEL CALL 2  gemini-3.8-flash        src/ai/prompts.ts:checkPrompt
-                        in:  all beliefs at once + the document
+                        in:  all beliefs at once + the document (long ones cut
+                             to relevant clauses: src/core/evidence/select.ts)
                         out: one finding per belief → validated by src/ai/schemas.ts
                              │
                              ▼  src/core/verdict/policy.ts  (no AI here)
@@ -33,7 +34,8 @@ step 4  report          no model call
 ```
 
 Exactly two model calls per document, whatever its size or belief count. See
-`docs/adr/0005-two-model-calls-per-document.md`.
+`docs/adr/0005-two-model-calls-per-document.md`. Each call caps `maxOutputTokens`; what is sent
+is bounded as described in `docs/adr/0007-send-only-what-the-model-reads.md`.
 
 ## What the model decides, and what it does not
 

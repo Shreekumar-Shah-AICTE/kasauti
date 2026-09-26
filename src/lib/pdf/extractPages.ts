@@ -30,12 +30,15 @@ export async function extractPdfPages(file: File): Promise<PdfExtraction> {
   const data = new Uint8Array(await file.arrayBuffer());
   const doc = await pdfjs.getDocument({ data, isEvalSupported: false }).promise;
   const limit = Math.min(doc.numPages, LIMITS.maxPages);
-  const pages: string[] = [];
-  for (let number = 1; number <= limit; number += 1) {
-    const page = await doc.getPage(number);
-    const content = await page.getTextContent();
-    pages.push(itemsToText(content.items));
-  }
+  // Pages are independent, so they are read concurrently rather than one round-trip at a time.
+  const numbers = Array.from({ length: limit }, (_, index) => index + 1);
+  const pages = await Promise.all(
+    numbers.map(async (number) => {
+      const page = await doc.getPage(number);
+      const content = await page.getTextContent();
+      return itemsToText(content.items);
+    }),
+  );
   await doc.destroy();
   return {
     pages,

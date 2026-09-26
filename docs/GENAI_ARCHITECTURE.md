@@ -55,7 +55,7 @@ The model proposes; deterministic code decides. This is the project's defining p
 - Structured output is validated with Zod (`src/ai/schemas.ts`); every model string is length-capped
   from `AI` in `src/core/constants.ts`.
 - One repair attempt echoes the validation error back to the model (`src/ai/repair.ts`).
-- A second failure, a 20 second timeout, or a missing key switches the response to `mode: "offline"`:
+- A second failure, a 45 second timeout, or a missing key switches the response to `mode: "offline"`:
   a deterministic question bank and keyword passages, with every finding marked `needs_review` and a
   banner telling the user nothing was model-checked. See `docs/adr/0004-degrade-honestly-offline.md`.
 

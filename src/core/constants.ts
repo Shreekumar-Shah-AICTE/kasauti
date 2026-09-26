@@ -52,7 +52,7 @@ export const AI = {
    */
   fallbackCheckModel: 'gemini-3.5-flash-lite',
   /** Hard timeout per model call. */
-  timeoutMs: 20_000,
+  timeoutMs: 45_000,
   /** Probe questions shown per document. */
   maxProbes: 3,
   /** Characters of the document sent when writing probes (the opening pages carry the key terms). */

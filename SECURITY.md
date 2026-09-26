@@ -37,7 +37,7 @@ Enforced server-side in `src/server/validateInput.ts` and `src/core/constants.ts
 | Pages                 | 30           |
 | Beliefs per request   | 8            |
 | Characters per belief | 300          |
-| Model call timeout    | 20 s         |
+| Model call timeout    | 45 s         |
 
 Oversized bodies are rejected with `413` before parsing. Invalid shapes get `422` with field names.
 Gibberish (fewer than three letters of real text) is rejected rather than sent to the model.

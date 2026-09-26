@@ -68,7 +68,7 @@ banner saying so. It never silently pretends to have checked.
 flowchart TD
     U["Browser · 4 steps"] -->|"PDF parsed on device"| API["Route handlers /api/probes /api/check"]
     API --> SRV["src/server · zod validation, rate limit, cache, CSP"]
-    SRV --> AI["src/ai · prompts, schemas, 1 repair retry, 20s timeout"]
+    SRV --> AI["src/ai · prompts, schemas, 1 repair retry, 45s timeout"]
     AI -->|"Gemini proposes (UNTRUSTED)"| CORE["src/core · quote verification, trust policy"]
     CORE -->|"verdicts + verified quotes only"| U
     AI -.->|"no key, timeout, bad schema twice"| OFF["offline mode · deterministic, flagged"]
@@ -129,7 +129,7 @@ ask the model to lie. See `docs/GENAI_ARCHITECTURE.md`.
 - **Cheap before expensive.** Size, origin, content-type and rate-limit checks run before the body
   is parsed; quote verification tries exact, then normalised matching, and only then an O(n)
   rolling word-overlap filter that gates the O(m²) edit-distance check.
-- **Nothing blocks forever.** Each model call has a 20 s abort; the browser abandons a request
+- **Nothing blocks forever.** Each model call has a 45 s abort; the browser abandons a request
   after 90 s with a clear message.
 - **Small client.** pdf.js is loaded with a dynamic `import()` only when a PDF is chosen, and runs
   in a worker. Six runtime dependencies in total.
